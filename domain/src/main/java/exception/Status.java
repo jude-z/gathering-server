@@ -35,7 +35,7 @@ public enum Status {
     UPLOAD_FAIL("UF", "Upload Fail"),
     DB_ERROR("DE", "Database Error"),
     FAIL_MESSAGE("FM", "Fail Messaging From SMTP"),
-    METHOD_NOT_ALLOWED("MN", "Method Not Allowed"),
+    METHOD_NOT_ALLOWED("MN", "Method Not Allowed");
 
     private final String code;
     private final String content;

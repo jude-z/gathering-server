@@ -1,16 +1,24 @@
 package entity.gathering;
 
-import spring.myproject.entity.category.Category;
-import spring.myproject.entity.enrollment.Enrollment;
-import spring.myproject.entity.fcm.Topic;
-import spring.myproject.entity.image.Image;
-import spring.myproject.entity.user.User;
+
+import entity.category.Category;
+import entity.enrollment.Enrollment;
+import entity.fcm.Topic;
+import entity.image.Image;
+import entity.user.User;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import requeset.gathering.GatheringRequestDto;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import static spring.myproject.dto.request.gathering.GatheringRequestDto.*;
+import static requeset.gathering.GatheringRequestDto.*;
+
 
 @Getter
 @NoArgsConstructor
@@ -42,7 +50,6 @@ public class Gathering {
     private Category category;
 
     @OneToMany(mappedBy = "gathering")
-    @Builder.Default
     private List<Enrollment> enrollments = new ArrayList<>();
 
     @OneToOne(fetch = FetchType.LAZY)
@@ -60,7 +67,7 @@ public class Gathering {
     }
 
 
-    public static Gathering of(AddGatheringRequest addGatheringRequest, User createBy, Image image,Category category){
+    public static Gathering of(AddGatheringRequest addGatheringRequest, User createBy, Image image, Category category){
         return Gathering.builder()
                 .title(addGatheringRequest.getTitle())
                 .content(addGatheringRequest.getContent())

@@ -1,11 +1,10 @@
 package entity.chat;
 
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import spring.myproject.entity.chat.ChatMessage;
-import spring.myproject.entity.chat.ChatParticipant;
 
 @Entity
 @NoArgsConstructor

@@ -1,11 +1,12 @@
 package entity.image;
 
+import entity.board.Board;
+import entity.gathering.Gathering;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import spring.myproject.entity.board.Board;
-import spring.myproject.entity.gathering.Gathering;
 
 @Getter
 @NoArgsConstructor

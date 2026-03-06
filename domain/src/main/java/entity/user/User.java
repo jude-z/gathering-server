@@ -1,16 +1,19 @@
 package entity.user;
 
+import entity.fcm.FCMToken;
+import entity.image.Image;
+import jakarta.persistence.*;
+import lombok.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.StringUtils;
-import spring.myproject.entity.fcm.FCMToken;
-import spring.myproject.entity.image.Image;
-import spring.myproject.entity.user.Role;
+import requeset.user.UserRequestDto;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import static spring.myproject.dto.request.user.UserRequestDto.*;
+import static requeset.user.UserRequestDto.*;
+
 
 @Getter
 @NoArgsConstructor

@@ -1,11 +1,11 @@
 package entity.fcm;
 
+import entity.user.User;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import spring.myproject.entity.fcm.Topic;
-import spring.myproject.entity.user.User;
 
 @Entity
 @Getter

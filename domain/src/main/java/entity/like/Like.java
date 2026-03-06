@@ -1,11 +1,12 @@
 package entity.like;
 
+import entity.gathering.Gathering;
+import entity.user.User;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import spring.myproject.entity.gathering.Gathering;
-import spring.myproject.entity.user.User;
 
 @Getter
 @NoArgsConstructor

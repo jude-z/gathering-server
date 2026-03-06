@@ -1,14 +1,14 @@
 package entity.chat;
 
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import spring.myproject.entity.chat.ChatParticipant;
+import requeset.chat.ChatRequestDto;
 
 import java.time.LocalDateTime;
 
-import static spring.myproject.dto.request.chat.ChatRequestDto.*;
 
 @Entity
 @NoArgsConstructor
@@ -31,7 +31,7 @@ public class ChatMessage {
     private ChatParticipant chatParticipant;
     private LocalDateTime createdAt;
 
-    public static ChatMessage of(ChatRoom chatRoom, ChatParticipant chatParticipant, ChatMessageRequest chatMessageRequest){
+    public static ChatMessage of(ChatRoom chatRoom, ChatParticipant chatParticipant, ChatRequestDto.ChatMessageRequest chatMessageRequest){
         return ChatMessage.builder()
                 .chatRoom(chatRoom)
                 .chatParticipant(chatParticipant)

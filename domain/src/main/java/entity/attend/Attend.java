@@ -1,7 +1,12 @@
 package entity.attend;
 
-import spring.myproject.entity.meeting.Meeting;
-import spring.myproject.entity.user.User;
+import entity.meeting.Meeting;
+import entity.user.User;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
@@ -22,6 +27,7 @@ public class Attend {
     @JoinColumn(name = "user_id")
     private User attendBy;
     private LocalDateTime date;
+
     public static Attend of(Meeting meeting, User attendBy, LocalDateTime date) {
         return Attend.builder()
                 .meeting(meeting)

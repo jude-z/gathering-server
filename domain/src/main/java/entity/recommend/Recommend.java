@@ -1,10 +1,11 @@
 package entity.recommend;
 
+import entity.gathering.Gathering;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import spring.myproject.entity.gathering.Gathering;
 
 import java.time.LocalDate;
 

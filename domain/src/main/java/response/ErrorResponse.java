@@ -1,7 +1,9 @@
 package response;
 
 import exception.CommonException;
+import lombok.Getter;
 
+@Getter
 public class ErrorResponse {
     private final String code;
     private final String content;

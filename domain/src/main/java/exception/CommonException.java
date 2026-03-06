@@ -1,5 +1,8 @@
 package exception;
 
+import lombok.Getter;
+
+@Getter
 public class CommonException extends RuntimeException{
     private final String code;
     private final String content;

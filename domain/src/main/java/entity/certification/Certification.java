@@ -1,11 +1,11 @@
 package entity.certification;
 
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import static spring.myproject.dto.request.user.UserRequestDto.*;
 
 @Getter
 @NoArgsConstructor

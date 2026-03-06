@@ -1,15 +1,20 @@
 package entity.meeting;
 
-import spring.myproject.entity.attend.Attend;
-import spring.myproject.entity.gathering.Gathering;
-import spring.myproject.entity.image.Image;
-import spring.myproject.entity.user.User;
+
+import entity.attend.Attend;
+import entity.gathering.Gathering;
+import entity.image.Image;
+import entity.user.User;
+import jakarta.persistence.*;
+import lombok.*;
+import requeset.meeting.MeetingRequestDto;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import static spring.myproject.dto.request.meeting.MeetingRequestDto.*;
+import static requeset.meeting.MeetingRequestDto.*;
+
 
 @NoArgsConstructor
 @AllArgsConstructor
