@@ -12,8 +12,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import spring.myproject.common.JwtSubject;
@@ -21,7 +19,6 @@ import spring.myproject.common.security.CustomUserDetail;
 import spring.myproject.common.validator.JwtValidator;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -39,19 +36,26 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             }
             String jwtToken = token.substring(7);
             Claims claims = jwtValidator.validateToken(jwtToken);
-            String username = claims.getSubject();
-            String role = (String) claims.get("role");
-            Long userId = ((Integer)claims.get("id")).longValue();
-            JwtSubject jwtSubject = JwtSubject.of(userId, role, username);
-            List<GrantedAuthority> authorities = new ArrayList<>();
-            authorities.add(new SimpleGrantedAuthority("ROLE_"+role));
-            CustomUserDetail customUserDetail = new CustomUserDetail(jwtSubject,authorities);
-            Authentication authentication = new UsernamePasswordAuthenticationToken(customUserDetail, "", customUserDetail.getAuthorities());
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+            JwtSubject jwtSubject = extractJwtSubject(claims);
+            CustomUserDetail customUserDetail = createUserDetail(jwtSubject);
+            SecurityContextHolder.getContext().setAuthentication(createAuthentication(customUserDetail));
         }
         filterChain.doFilter(request, response);
     }
 
+    private JwtSubject extractJwtSubject(Claims claims) {
+        String username = claims.getSubject();
+        String role = (String) claims.get("role");
+        Long userId = ((Integer) claims.get("id")).longValue();
+        return JwtSubject.of(userId, role, username);
+    }
 
+    private CustomUserDetail createUserDetail(JwtSubject jwtSubject) {
+        List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + jwtSubject.getRole()));
+        return new CustomUserDetail(jwtSubject, authorities);
+    }
 
+    private Authentication createAuthentication(CustomUserDetail userDetail) {
+        return new UsernamePasswordAuthenticationToken(userDetail, "", userDetail.getAuthorities());
+    }
 }
