@@ -1,11 +1,11 @@
 package api.common.mapper;
 
-import infra.dto.jdbc.gathering.GatheringDetailProjection;
+import infra.repository.dto.jdbc.gathering.GatheringDetailProjection;
 import entity.category.Category;
 import entity.gathering.Gathering;
 import entity.image.Image;
 import entity.user.User;
-import util.ImageUrlProcess;
+import common.ImageUrlProcess;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;

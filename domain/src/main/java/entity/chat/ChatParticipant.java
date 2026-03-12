@@ -33,14 +33,4 @@ public class ChatParticipant {
         this.chatRoom = chatRoom;
         this.status = status;
     }
-
-    public static ChatParticipant of(ChatRoom chatRoom, User user, boolean status){
-        return ChatParticipant.builder()
-                .chatRoom(chatRoom)
-                .user(user)
-                .status(status)
-                .build();
-    }
-
-
 }

@@ -2,13 +2,13 @@ package infra.repository.board;
 
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import infra.dto.PageInfo;
-import infra.dto.PageableInfo;
-import infra.dto.querydsl.QueryDslPageResponse;
-import infra.dto.querydsl.board.BoardProjection;
-import infra.dto.querydsl.board.BoardsProjection;
+import util.page.PageInfo;
+import util.page.PageableInfo;
+import infra.repository.dto.querydsl.QueryDslPageResponse;
+import infra.repository.dto.querydsl.board.BoardProjection;
+import infra.repository.dto.querydsl.board.BoardsProjection;
 import lombok.RequiredArgsConstructor;
-import util.PageCalculator;
+import util.page.PageCalculator;
 
 import java.util.List;
 

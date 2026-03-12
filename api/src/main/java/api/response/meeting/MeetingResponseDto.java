@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import infra.dto.querydsl.meeting.MeetingsProjection;
+import infra.repository.dto.querydsl.meeting.MeetingsProjection;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;

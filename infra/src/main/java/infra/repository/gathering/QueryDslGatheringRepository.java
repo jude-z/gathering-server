@@ -2,15 +2,15 @@ package infra.repository.gathering;
 
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import infra.dto.PageInfo;
-import infra.dto.PageableInfo;
-import infra.dto.querydsl.QueryDslPageResponse;
-import infra.dto.querydsl.gathering.GatheringsProjection;
-import infra.dto.querydsl.gathering.ParticipatedProjection;
+import util.page.PageInfo;
+import util.page.PageableInfo;
+import infra.repository.dto.querydsl.QueryDslPageResponse;
+import infra.repository.dto.querydsl.gathering.GatheringsProjection;
+import infra.repository.dto.querydsl.gathering.ParticipatedProjection;
 import entity.gathering.Gathering;
 import entity.user.QUser;
 import lombok.RequiredArgsConstructor;
-import util.PageCalculator;
+import util.page.PageCalculator;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -142,7 +142,6 @@ public class QueryDslGatheringRepository {
                 .join(gathering.createBy, cr)
                 .leftJoin(gathering.gatheringImage, image)
                 .where(recommend.date.eq(localDate))
-                .orderBy(recommend.score.desc())
                 .offset(offset)
                 .limit(limit)
                 .fetch();

@@ -1,13 +1,13 @@
 package infra.repository.fcm;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import infra.dto.PageInfo;
-import infra.dto.PageableInfo;
-import infra.dto.querydsl.QueryDslPageResponse;
+import util.page.PageInfo;
+import util.page.PageableInfo;
+import infra.repository.dto.querydsl.QueryDslPageResponse;
 import entity.fcm.FCMToken;
 import entity.fcm.UserTopic;
 import lombok.RequiredArgsConstructor;
-import util.PageCalculator;
+import util.page.PageCalculator;
 
 import java.time.LocalDate;
 import java.util.List;

@@ -1,7 +1,7 @@
 package api.service.fcm;
 
 import api.common.mapper.FCMTokenTopicMapper;
-import infra.dto.querydsl.QueryDslPageResponse;
+import infra.repository.dto.querydsl.QueryDslPageResponse;
 import entity.fcm.FCMToken;
 import entity.fcm.FCMTokenTopic;
 import entity.fcm.Topic;

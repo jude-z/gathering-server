@@ -36,12 +36,4 @@ public class ChatMessage {
         this.createdAt = createdAt;
     }
 
-//    public static ChatMessage of(ChatRoom chatRoom, ChatParticipant chatParticipant, ChatRequestDto.ChatMessageRequest chatMessageRequest){
-//        return ChatMessage.builder()
-//                .chatRoom(chatRoom)
-//                .chatParticipant(chatParticipant)
-//                .content(chatMessageRequest.getContent())
-//                .build();
-//    }
-
 }

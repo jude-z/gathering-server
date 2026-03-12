@@ -1,16 +1,16 @@
 package api.service.chat;
 
+import api.common.mapper.ChatMapper;
 import api.response.ApiDataResponse;
 import api.response.ApiResponse;
-import infra.dto.PageableInfo;
-import infra.dto.querydsl.QueryDslPageResponse;
+import infra.repository.dto.querydsl.QueryDslPageResponse;
 import entity.chat.ChatMessage;
 import entity.chat.ChatParticipant;
 import entity.chat.ChatRoom;
 import entity.gathering.Gathering;
 import entity.user.User;
 import exception.CommonException;
-import infra.dto.querydsl.chat.*;
+import infra.repository.dto.querydsl.chat.*;
 import jakarta.transaction.Transactional;
 import infra.repository.chat.JdbcChatRepository;
 import infra.repository.chat.ChatMessageRepository;
@@ -22,7 +22,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import infra.repository.chat.QueryDslChatRepository;
-import util.PageCalculator;
+import page.PageCalculator;
+import page.PageableInfo;
 
 import java.util.List;
 import java.util.Optional;
@@ -86,7 +87,7 @@ public class ChatService {
         Gathering gathering = gatheringRepository.findById(gatheringId)
                 .orElseThrow(() -> new CommonException(NOT_FOUND_GATHERING));
         ChatRoom chatRoom = AddChatRequest.toChatRoom(addChatRequest,user,gathering);
-        ChatParticipant chatParticipant = ChatParticipant.of(chatRoom, user,false);
+        ChatParticipant chatParticipant = ChatMapper.toChatParticipant(chatRoom, user, false);
         chatRoomRepository.save(chatRoom);
         chatParticipantRepository.save(chatParticipant);
         return ApiDataResponse.of(chatRoom.getId(), SUCCESS);
@@ -99,7 +100,7 @@ public class ChatService {
                 .orElseThrow(()->new CommonException(NOT_FOUND_USER));
         Optional<ChatParticipant> optionalChatParticipant = chatParticipantRepository.findByChatRoomAndUserAndStatus(chatRoom,user,false);
         if(optionalChatParticipant.isEmpty()){
-            chatParticipantRepository.save(ChatParticipant.of(chatRoom,user,true));
+            chatParticipantRepository.save(ChatMapper.toChatParticipant(chatRoom, user, true));
             chatRoom.changeCount(chatRoom.getCount()+1);
         }
         if(optionalChatParticipant.isPresent()) optionalChatParticipant.get().changeStatus(true);

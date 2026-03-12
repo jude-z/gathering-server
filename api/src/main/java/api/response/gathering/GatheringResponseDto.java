@@ -1,12 +1,12 @@
 package api.response.gathering;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import infra.dto.querydsl.gathering.GatheringsProjection;
+import infra.repository.dto.querydsl.gathering.GatheringsProjection;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import util.ImageUrlProcess;
+import common.ImageUrlProcess;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;

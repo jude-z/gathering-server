@@ -31,11 +31,4 @@ public class Like {
         this.likedBy = likedBy;
         this.gathering = gathering;
     }
-
-    public static Like of(Gathering gathering, User user) {
-        return Like.builder()
-                .gathering(gathering)
-                .likedBy(user)
-                .build();
-    }
 }

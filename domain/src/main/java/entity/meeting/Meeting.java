@@ -40,12 +40,6 @@ public class Meeting {
     private Image image;
     private int count;
 
-    public void attend(List<Attend> attends){
-        for (Attend attend : attends) {
-            attend.addMeeting(this);
-        }
-        this.attends = attends;
-    }
     @Builder
     private Meeting(String title, LocalDateTime meetingDate, LocalDateTime endDate, String content, User createdBy
             , Gathering gathering, Image image, int count) {
@@ -68,16 +62,4 @@ public class Meeting {
         this.image = image;
     }
 
-    //    public static Meeting of(AddMeetingRequest addMeetingRequest, Image image, User user, Gathering gathering){
-//        return Meeting.builder()
-//                .title(addMeetingRequest.getTitle())
-//                .content(addMeetingRequest.getContent())
-//                .createdBy(user)
-//                .meetingDate(addMeetingRequest.getMeetingDate())
-//                .endDate(addMeetingRequest.getEndDate())
-//                .gathering(gathering)
-//                .count(1)
-//                .image(image)
-//                .build();
-//    }
 }

@@ -2,15 +2,15 @@ package infra.repository.meeting;
 
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import infra.dto.PageInfo;
-import infra.dto.PageableInfo;
-import infra.dto.querydsl.QueryDslPageResponse;
-import infra.dto.querydsl.meeting.MeetingProjection;
-import infra.dto.querydsl.meeting.MeetingsProjection;
+import util.page.PageInfo;
+import util.page.PageableInfo;
+import infra.repository.dto.querydsl.QueryDslPageResponse;
+import infra.repository.dto.querydsl.meeting.MeetingProjection;
+import infra.repository.dto.querydsl.meeting.MeetingsProjection;
 import entity.image.QImage;
 import entity.user.QUser;
 import lombok.RequiredArgsConstructor;
-import util.PageCalculator;
+import util.page.PageCalculator;
 
 import java.util.List;
 
@@ -63,7 +63,7 @@ public class QueryDslMeetingRepository {
                 .fetchOne();
 
         int elementSize = content.size();
-        PageInfo<List<MeetingProjection>> pageInfo = PageCalculator.toPageInfo(content, offset, limit, totalCount, elementSize);
+        PageInfo<List<MeetingProjection>> pageInfo = PageCalculator.toPageInfo(content, -1, -1, totalCount, elementSize);
         return QueryDslPageResponse.of(content, pageInfo);
     }
 

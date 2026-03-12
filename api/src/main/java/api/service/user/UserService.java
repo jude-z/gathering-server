@@ -6,8 +6,8 @@ import api.response.ApiResponse;
 import api.response.ApiStatusResponse;
 import api.service.image.ImageUploadService;
 import common.ImageUrlConverter;
-import infra.dto.PageableInfo;
-import infra.dto.querydsl.QueryDslPageResponse;
+import util.page.PageableInfo;
+import infra.repository.dto.querydsl.QueryDslPageResponse;
 import entity.image.Image;
 import entity.user.User;
 import exception.CommonException;
@@ -23,7 +23,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 import infra.repository.certification.QueryDslCertificationRepository;
 import infra.repository.user.QueryDslUserRepository;
-import util.PageCalculator;
+import util.page.PageCalculator;
 
 import java.io.IOException;
 
@@ -107,7 +107,7 @@ public class UserService {
     }
 
     public ApiResponse emailCertification(EmailCertificationRequest emailCertificationRequest) {
-        PageableInfo pageableInfo = PageCalculator.toPageableInfo(1, 1);
+        PageableInfo pageableInfo = PageCalculator.toDefaultPageableInfo();
         QueryDslPageResponse<User> queryDslPageResponse = queryDslUserRepository.findByEmail(pageableInfo,emailCertificationRequest.getEmail());
         if(!queryDslPageResponse.isEmpty()) throw new CommonException(DUPLICATE_EMAIL);
         //TODO: Kafka Producer

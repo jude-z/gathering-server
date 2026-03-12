@@ -35,13 +35,4 @@ public class Alarm {
         this.checked = checked;
     }
 
-    public static Alarm from(String content,User user){
-        return Alarm.builder()
-                .content(content)
-                .user(user)
-                .date(LocalDateTime.now())
-                .checked(false)
-                .build();
-    }
-
 }

@@ -5,8 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import infra.dto.querydsl.board.BoardProjection;
-import infra.dto.querydsl.board.BoardsProjection;
+import infra.repository.dto.querydsl.board.BoardProjection;
+import infra.repository.dto.querydsl.board.BoardsProjection;
 
 import java.time.LocalDateTime;
 import java.util.List;

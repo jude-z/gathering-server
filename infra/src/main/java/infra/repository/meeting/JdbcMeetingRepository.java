@@ -1,6 +1,5 @@
 package infra.repository.meeting;
 
-import dto.jdbc.meeting.MeetingsProjection;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;

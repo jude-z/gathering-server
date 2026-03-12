@@ -1,5 +1,6 @@
 package api.service.like;
 
+import api.common.mapper.LikeMapper;
 import api.response.ApiResponse;
 import api.response.ApiStatusResponse;
 import entity.gathering.Gathering;
@@ -35,7 +36,7 @@ public class LikeService {
                     .orElseThrow(()-> new CommonException(NOT_FOUND_GATHERING));
             if(queryDslLikeRepository.findLike(userId,gatheringId).isPresent())
                 throw new CommonException(ALREADY_LIKE);
-            likeRepository.save(Like.of(gathering,user));
+            likeRepository.save(LikeMapper.toLike(gathering, user));
             return ApiStatusResponse.of(SUCCESS);
     }
     public ApiResponse dislike(Long gatheringId, Long userId) {

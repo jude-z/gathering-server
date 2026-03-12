@@ -6,7 +6,7 @@ import api.response.ApiResponse;
 import api.response.ApiStatusResponse;
 import api.service.alarm.AlarmService;
 import api.service.fcm.FCMTokenTopicService;
-import entity.alarm.Alarm;
+import api.common.mapper.AlarmMapper;
 import entity.enrollment.Enrollment;
 import entity.fcm.FCMToken;
 import entity.fcm.Topic;
@@ -63,8 +63,7 @@ public class EnrollmentService {
             List<FCMToken> tokens = createBy.getTokens();
             fcmTokenTopicService.sendByToken(tokenNotificationRequestDto, tokens);
             String alarmContent = "%s has enrolled gathering".formatted(user.getNickname());
-            Alarm alarm = Alarm.from(alarmContent, createBy);
-            alarmService.save(alarm);
+            alarmService.save(AlarmMapper.toAlarm(alarmContent, createBy));
             return ApiStatusResponse.of(SUCCESS);
     }
     public ApiResponse disEnrollGathering(Long gatheringId, Long userId) {
@@ -109,8 +108,7 @@ public class EnrollmentService {
             String topicName = topic.getTopicName();
             fcmTokenTopicService.subscribeToTopic(topicName,enrolledById);
             String alarmContent = "permit Gathering";
-            Alarm alarm = Alarm.from(alarmContent, enrolledBy);
-            alarmService.save(alarm);
+            alarmService.save(AlarmMapper.toAlarm(alarmContent, enrolledBy));
             return ApiStatusResponse.of(SUCCESS);
 
     }

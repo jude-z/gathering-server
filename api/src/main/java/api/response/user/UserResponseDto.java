@@ -7,7 +7,7 @@ import exception.Status;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import util.ImageUrlProcess;
+import common.ImageUrlProcess;
 
 
 public class UserResponseDto {

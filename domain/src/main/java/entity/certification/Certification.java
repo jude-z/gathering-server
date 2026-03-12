@@ -23,11 +23,4 @@ public class Certification {
         this.email = email;
         this.certification = certification;
     }
-
-    public static Certification of(String email, String certification) {
-        return Certification.builder()
-                .email(email)
-                .certification(certification)
-                .build();
-    }
 }

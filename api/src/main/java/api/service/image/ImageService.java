@@ -2,8 +2,8 @@ package api.service.image;
 
 import api.response.ApiDataResponse;
 import api.response.ApiResponse;
-import infra.dto.PageableInfo;
-import infra.dto.querydsl.QueryDslPageResponse;
+import util.page.PageableInfo;
+import infra.repository.dto.querydsl.QueryDslPageResponse;
 import entity.image.Image;
 import exception.CommonException;
 import exception.Status;
@@ -15,7 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import infra.repository.image.QueryDslImageRepository;
-import util.PageCalculator;
+import util.page.PageCalculator;
 
 import java.io.IOException;
 import java.util.List;

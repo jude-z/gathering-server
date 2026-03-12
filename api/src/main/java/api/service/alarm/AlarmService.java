@@ -3,9 +3,9 @@ package api.service.alarm;
 import api.response.ApiDataResponse;
 import api.response.ApiResponse;
 import api.response.ApiStatusResponse;
-import infra.dto.PageInfo;
-import infra.dto.PageableInfo;
-import infra.dto.querydsl.QueryDslPageResponse;
+import util.page.PageInfo;
+import util.page.PageableInfo;
+import infra.repository.dto.querydsl.QueryDslPageResponse;
 import entity.alarm.Alarm;
 import entity.user.User;
 import exception.CommonException;
@@ -15,7 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import infra.repository.alarm.QueryDslAlarmRepository;
-import util.PageCalculator;
+import util.page.PageCalculator;
 
 import java.util.List;
 

@@ -1,7 +1,7 @@
 package infra.repository.gathering;
 
-import infra.dto.jdbc.gathering.GatheringDetailProjection;
-import infra.dto.jdbc.gathering.MainGatheringsProjection;
+import infra.repository.dto.jdbc.gathering.GatheringDetailProjection;
+import infra.repository.dto.jdbc.gathering.MainGatheringsProjection;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
