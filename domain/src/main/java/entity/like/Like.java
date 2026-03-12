@@ -12,8 +12,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Entity
 @Table(name = "likes")
-@AllArgsConstructor
-@Builder
 public class Like {
 
     @Id
@@ -28,10 +26,9 @@ public class Like {
     @JoinColumn(name = "gathering_id")
     private Gathering gathering;
 
-    public static Like of(Gathering gathering, User user) {
-        return Like.builder()
-                .gathering(gathering)
-                .likedBy(user)
-                .build();
+    @Builder
+    private Like(User likedBy, Gathering gathering) {
+        this.likedBy = likedBy;
+        this.gathering = gathering;
     }
 }

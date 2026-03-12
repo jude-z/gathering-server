@@ -24,7 +24,7 @@ gathering-server/
 ├── infra/           # Repositories (JPA, QueryDSL, JDBC), Redis, FCM config
 ├── util/            # Utility classes and interfaces
 ├── common/          # Shared configurations
-├── mail-server/     # Email service (separate Spring Boot app)
+├── mailserver-server/     # Email service (separate Spring Boot app)
 ├── chat-server/     # Chat module
 └── src/             # Core services, security, WebSocket, RabbitMQ config
 ```
@@ -39,7 +39,7 @@ gathering-server/
 - **Board** — Discussion posts with image attachments
 - **Likes & Recommendations** — Like gatherings and get top-10 recommendations
 - **Image Upload** — AWS S3 integration for profile and gathering images
-- **Email Notifications** — Async email processing via dedicated mail server
+- **Email Notifications** — Async email processing via dedicated mailserver server
 - **SSE** — Server-Sent Events for real-time failure notifications
 
 ## API Endpoints

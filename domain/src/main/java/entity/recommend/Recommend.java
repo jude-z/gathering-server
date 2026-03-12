@@ -24,18 +24,6 @@ public class Recommend {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "gathering_id")
     private Gathering gathering;
-    private Long score;
     private LocalDate date;
-
-    public static Recommend from(Gathering gathering){
-        return Recommend.builder()
-                .gathering(gathering)
-                .date(LocalDate.now())
-                .score(1L)
-                .build();
-    }
-    public void setCount(Long score){
-        this.score=score;
-    }
 
 }
