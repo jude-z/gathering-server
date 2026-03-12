@@ -9,10 +9,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class IdGenerator {
     private final RedisTemplate<String,String> redisTemplate;
-    @Value("${chat-message.id}")
-    private String key;
+    @Value("${chat-message-send.id}")
+    private String sendKey;
+    @Value("${chat-message-reply.id}")
+    private String replyKey;
 
-    public Long nextId(){
+    public Long nextId(String key){
         return redisTemplate.opsForValue().increment(key);
     }
 }
