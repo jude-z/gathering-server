@@ -20,7 +20,6 @@ import java.util.concurrent.TimeUnit;
 public class KafkaProducer {
 
     private final OutboxRepository outboxRepository;
-
     private final KafkaTemplate<String,String> kafkaTemplate;
 
 

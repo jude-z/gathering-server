@@ -8,14 +8,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.scheduling.annotation.EnableScheduling;
 
 @AutoConfiguration
 @ComponentScan(basePackages = "infra")
 @EnableJpaRepositories(basePackages = {"infra"})
 @EntityScan(basePackages = {"entity", "infra"})
 @EnableAsync
-@EnableScheduling
 public class InfraAutoConfiguration {
 
     @Bean
