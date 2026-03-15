@@ -10,8 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 @Getter
 @RequiredArgsConstructor
 public enum EventType {
-    CHAT_MESSAGE(ChatMessagePayload.class, Topic.CHAT_MESSAGE),
-    CHAT_MESSAGE_COMPLETE(ChatMessageCompletePayload.class,Topic.CHAT_MESSAGE_COMPLETE);
+    CHAT_MESSAGE(ChatMessagePayload.class, Topic.CHAT_MESSAGE);
 
     private final Class<? extends EventPayload> payloadClass;
     private final String topic;

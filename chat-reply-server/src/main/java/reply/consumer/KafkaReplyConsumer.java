@@ -18,8 +18,8 @@ import reply.service.ChatReplyService;
 @Component
 public class KafkaReplyConsumer {
 
-    private final ChatReplyService chatReplyService;
     private final EventPublisher eventPublisher;
+    ChatReplyService chatReplyService;
 
     @KafkaListener(topics = {
             EventType.Topic.CHAT_MESSAGE,
@@ -28,9 +28,8 @@ public class KafkaReplyConsumer {
     )
     public void chatMessageListen(String message, Acknowledgment ack) {
         Event<ChatMessagePayload> event = (Event<ChatMessagePayload>)(Event .fromJson(message));
+        eventPublisher.publishEvent(event);
         chatReplyService.handle(event);
-        Event<ChatMessageCompletePayload> completeEvent = (Event<ChatMessageCompletePayload>)(eventPublisher.createCompleteEvent(event));
-        eventPublisher.publishEvent(completeEvent);
         ack.acknowledge();
     }
 
