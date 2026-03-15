@@ -1,11 +1,10 @@
-package send.controller;
+package chat.controller;
 
 
+import chat.service.ChatService;
 import infra.kafka.KafkaProducer;
 import infra.kafka.event.Event;
-import infra.kafka.event.EventPayload;
 import infra.kafka.event.EventType;
-import infra.kafka.event.payload.ChatMessageCompletePayload;
 import infra.kafka.event.payload.ChatMessagePayload;
 import infra.redis.generator.IdGenerator;
 import lombok.RequiredArgsConstructor;
@@ -20,11 +19,12 @@ public class SendController {
 
     private final KafkaProducer kafkaProducer;
     private final IdGenerator idGenerator;
+    private final ChatService chatService;
 
     @MessageMapping("/{chatRoomId}")
     public void sendMessage(@DestinationVariable Long chatRoomId, @Payload ChatMessagePayload chatMessagePayload){
-        Event chatMessageEvent = createChatMessageEvent(chatRoomId, chatMessagePayload);
-        kafkaProducer.publishEvent(chatMessageEvent);
+        Event event = createChatMessageEvent(chatRoomId, chatMessagePayload);
+        chatService.handle(event);
     }
 
     public Event createChatMessageEvent(Long chatRoomId, ChatMessagePayload chatMessagePayload) {

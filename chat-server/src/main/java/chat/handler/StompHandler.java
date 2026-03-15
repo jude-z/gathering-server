@@ -1,8 +1,8 @@
-package send.handler;
+package chat.handler;
 
+import chat.service.ChatService;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -11,7 +11,6 @@ import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.stereotype.Component;
-import send.service.ChatSendService;
 
 import javax.crypto.SecretKey;
 
@@ -19,12 +18,12 @@ import javax.crypto.SecretKey;
 public class StompHandler implements ChannelInterceptor {
 
     private final SecretKey secretKey;
-    private final ChatSendService chatSendService;
+    private final ChatService chatService;
 
     public StompHandler(@Value("${jwt.secretKey}") String secretKey
-            ,ChatSendService chatSendService) {
+            ,ChatService chatService) {
         this.secretKey = Keys.hmacShaKeyFor(java.util.Base64.getDecoder().decode(secretKey));
-        this.chatSendService = chatSendService;
+        this.chatService = chatService;
     }
 
     @Override

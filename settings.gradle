@@ -9,5 +9,4 @@ include 'common:event'
 include 'common:util'
 include 'common:page'
 
-include 'chat-send-server'
-include 'chat-reply-server'
+include 'chat-server'

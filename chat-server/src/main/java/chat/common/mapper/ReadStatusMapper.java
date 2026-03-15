@@ -1,4 +1,4 @@
-package reply.common.mapper;
+package chat.common.mapper;
 
 import entity.chat.ChatMessage;
 import entity.chat.ChatParticipant;

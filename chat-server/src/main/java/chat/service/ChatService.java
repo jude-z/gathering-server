@@ -1,5 +1,6 @@
-package reply.service;
+package chat.service;
 
+import chat.common.mapper.ReadStatusMapper;
 import entity.chat.ChatMessage;
 import entity.chat.ChatParticipant;
 import entity.chat.ChatRoom;
@@ -20,12 +21,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-import reply.common.mapper.ReadStatusMapper;
 
 import java.util.List;
 @Service
 @RequiredArgsConstructor
-public class ChatReplyService {
+public class ChatService {
 
     private final UserRepository userRepository;
     private final ChatRoomRepository chatRoomRepository;
@@ -80,6 +80,9 @@ public class ChatReplyService {
     private String generateKey(EventPayload eventPayload){
         Long eventId = eventPayload.getEventId();
         return key + ":" + eventId;
+    }
+    public boolean isRoomParticipant(Long userId, Long chatRoomId){
+        return true;
     }
 
 }
