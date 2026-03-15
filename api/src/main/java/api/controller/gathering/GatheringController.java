@@ -43,7 +43,7 @@ public class GatheringController {
     }
 
     @GetMapping("/gathering/participated/{gatheringId}")
-    public ResponseEntity<ApiResponse> participated(@PathVariable Long gatheringId, Integer pageNum, Integer pageSize){
+    public ResponseEntity<ApiResponse> participated(@PathVariable Long gatheringId, @RequestParam(defaultValue = "1") Integer pageNum, @RequestParam(defaultValue = "10") Integer pageSize){
         ApiResponse apiResponse = gatheringService.participated(gatheringId, pageNum, pageSize);
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
@@ -56,15 +56,15 @@ public class GatheringController {
 
     @GetMapping("/gathering")
     public ResponseEntity<ApiResponse> gatheringCategory(@RequestParam String category,
-                                                         @RequestParam Integer pageNum,
-                                                         @RequestParam Integer pageSize){
+                                                         @RequestParam(defaultValue = "1") Integer pageNum,
+                                                         @RequestParam(defaultValue = "10") Integer pageSize){
         ApiResponse apiResponse = gatheringService.gatheringCategory(category, pageNum, pageSize);
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
     @PostMapping("/gatherings/like")
-    public ResponseEntity<ApiResponse> gatheringsLike(@RequestParam int pageNum,
-                                                      @RequestParam Integer pageSize,
+    public ResponseEntity<ApiResponse> gatheringsLike(@RequestParam(defaultValue = "1") Integer pageNum,
+                                                      @RequestParam(defaultValue = "10") Integer pageSize,
                                                       @Username Long userId){
         ApiResponse apiResponse = gatheringService.gatheringsLike(pageNum, pageSize, userId);
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);

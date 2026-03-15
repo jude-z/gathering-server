@@ -17,25 +17,25 @@ public class ChatController {
     private final ChatService chatService;
 
     @GetMapping("/my/chats")
-    public ResponseEntity<ApiResponse> fetchMyChatRooms(@RequestParam Integer pageNum, @RequestParam Integer pageSize, @Username Long userId){
+    public ResponseEntity<ApiResponse> fetchMyChatRooms(@RequestParam(defaultValue = "1") Integer pageNum, @RequestParam(defaultValue = "10") Integer pageSize, @Username Long userId){
         ApiResponse apiResponse = chatService.fetchMyChatRooms(pageNum, pageSize, userId);
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
     @GetMapping("/gathering/{gatheringId}/chats")
-    public ResponseEntity<ApiResponse> fetchChatRooms(@PathVariable Long gatheringId, @RequestParam Integer pageNum, @RequestParam Integer pageSize, @Username Long userId){
+    public ResponseEntity<ApiResponse> fetchChatRooms(@PathVariable Long gatheringId, @RequestParam(defaultValue = "1") Integer pageNum, @RequestParam(defaultValue = "10") Integer pageSize, @Username Long userId){
         ApiResponse apiResponse = chatService.fetchChatRooms(gatheringId, pageNum, pageSize, userId);
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
     @GetMapping("/gathering/{gatheringId}/able/chats")
-    public ResponseEntity<ApiResponse> fetchAbleChatRooms(@PathVariable Long gatheringId, @RequestParam Integer pageNum, @RequestParam Integer pageSize, @Username Long userId){
+    public ResponseEntity<ApiResponse> fetchAbleChatRooms(@PathVariable Long gatheringId, @RequestParam(defaultValue = "1") Integer pageNum, @RequestParam(defaultValue = "10") Integer pageSize, @Username Long userId){
         ApiResponse apiResponse = chatService.fetchAbleChatRooms(gatheringId, pageNum, pageSize, userId);
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
     @GetMapping("/gathering/{gatheringId}/participate/chats")
-    public ResponseEntity<ApiResponse> fetchParticipateChatRooms(@PathVariable Long gatheringId, @RequestParam Integer pageNum, @RequestParam Integer pageSize, @Username Long userId){
+    public ResponseEntity<ApiResponse> fetchParticipateChatRooms(@PathVariable Long gatheringId, @RequestParam(defaultValue = "1") Integer pageNum, @RequestParam(defaultValue = "10") Integer pageSize, @Username Long userId){
         ApiResponse apiResponse = chatService.fetchParticipateChatRooms(gatheringId, pageNum, pageSize, userId);
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
@@ -59,7 +59,7 @@ public class ChatController {
     }
 
     @GetMapping("/messages/{chatId}")
-    public ResponseEntity<ApiResponse> fetchMessages(@PathVariable Long chatId, @RequestParam Integer pageNum, @RequestParam Integer pageSize, @Username Long userId){
+    public ResponseEntity<ApiResponse> fetchMessages(@PathVariable Long chatId, @RequestParam(defaultValue = "1") Integer pageNum, @RequestParam(defaultValue = "10") Integer pageSize, @Username Long userId){
         ApiResponse apiResponse = chatService.fetchUnReadMessages(chatId, pageNum,pageSize,userId);
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
@@ -78,7 +78,7 @@ public class ChatController {
 
     @GetMapping("/chat/participant/{chatId}")
     public ResponseEntity<ApiResponse> fetchParticipant(@PathVariable Long chatId, @Username Long userId,
-                                                        @RequestParam Integer pageNum, @RequestParam Integer pageSize){
+                                                        @RequestParam(defaultValue = "1") Integer pageNum, @RequestParam(defaultValue = "10") Integer pageSize){
         ApiResponse apiResponse = chatService.fetchParticipant(chatId, userId, pageNum, pageSize);
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }

@@ -28,8 +28,8 @@ public class AlarmController {
     }
 
     @GetMapping("/alarm")
-    public ResponseEntity<ApiResponse> alarmList(@RequestParam Integer pageNum,
-                                                 @RequestParam Integer pageSize,
+    public ResponseEntity<ApiResponse> alarmList(@RequestParam(defaultValue = "1") Integer pageNum,
+                                                 @RequestParam(defaultValue = "10") Integer pageSize,
                                                  @Username Long userId,
                                                  @RequestParam Boolean checked){
         ApiResponse apiResponse = alarmService.alarmList(pageNum, pageSize,userId, checked);

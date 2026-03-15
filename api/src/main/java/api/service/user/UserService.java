@@ -4,11 +4,13 @@ import api.common.mapper.UserMapper;
 import api.response.ApiDataResponse;
 import api.response.ApiResponse;
 import api.response.ApiStatusResponse;
+import api.security.jwt.JwtProvider;
 import api.service.image.ImageUploadService;
 import infra.repository.dto.querydsl.QueryDslPageResponse;
 import entity.image.Image;
 import entity.user.User;
 import exception.CommonException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import infra.repository.image.ImageRepository;
 import infra.repository.user.UserRepository;
@@ -45,6 +47,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final ImageUploadService imageUploadService;
     private final ImageUrlConverter imageUrlConverter;
+    private final JwtProvider jwtProvider;
 
 
     public ApiResponse idCheck(IdCheckRequest idCheckRequest) {
@@ -103,7 +106,12 @@ public class UserService {
             if(!matches){
                 throw new CommonException(UN_CORRECT_PASSWORD);
             }
-            return ApiStatusResponse.of(SUCCESS);
+            String accessToken = jwtProvider.createAccessToken(user);
+            String refreshToken = jwtProvider.createRefreshToken(user);
+            Cookie cookie = new Cookie("refreshToken", refreshToken);
+            cookie.setHttpOnly(true);
+            response.addCookie(cookie);
+            return ApiDataResponse.of(accessToken,SUCCESS);
     }
 
     public ApiResponse emailCertification(EmailCertificationRequest emailCertificationRequest) {

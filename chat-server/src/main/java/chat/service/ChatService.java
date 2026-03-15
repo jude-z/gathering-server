@@ -33,7 +33,7 @@ public class ChatService {
     private final ChatMessageRepository chatMessageRepository;
     private final RedisTemplate<String,String> redisTemplate;
     private final ReadStatusRepository readStatusRepository;
-    @Value("{chat-message.key}")
+    @Value("${chat-message.key}")
     private String key;
 
     public void handle(Event<ChatMessagePayload> event) {

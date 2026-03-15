@@ -27,7 +27,6 @@ public class UserMapper {
                 .age(signUpRequest.getAge())
                 .hobby(signUpRequest.getHobby())
                 .nickname(signUpRequest.getNickname())
-                .role(Role.USER)
                 .profileImage(image)
                 .build();
     }

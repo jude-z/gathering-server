@@ -44,14 +44,14 @@ public class User implements Serializable {
 
     @Builder
     private User(String username, String password, String email, String address, Integer age, String hobby,
-                 Role role, String nickname, Image profileImage, String refreshToken) {
+                 String nickname, Image profileImage, String refreshToken) {
         this.username = username;
         this.password = password;
         this.email = email;
         this.address = address;
         this.age = age;
         this.hobby = hobby;
-        this.role = role;
+        this.role = Role.USER;
         this.nickname = nickname;
         this.profileImage = profileImage;
         this.refreshToken = refreshToken;
