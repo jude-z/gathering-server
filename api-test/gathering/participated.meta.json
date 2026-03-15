@@ -1,0 +1,6 @@
+{
+  "method": "GET",
+  "url": "/gathering/participated/{gatheringId}",
+  "auth": false,
+  "queryParam": ["pageNum", "pageSize"]
+}

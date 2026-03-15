@@ -1,0 +1,6 @@
+{
+  "method": "POST",
+  "url": "/auth/nickname-check",
+  "contentType": "application/json",
+  "auth": false
+}

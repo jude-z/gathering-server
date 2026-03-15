@@ -1,0 +1,7 @@
+{
+  "method": "POST",
+  "url": "/gathering/{gatheringId}/meeting",
+  "contentType": "multipart/form-data",
+  "auth": true,
+  "parts": ["addMeetingRequest (json)", "file (image)"]
+}

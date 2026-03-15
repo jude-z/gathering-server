@@ -1,0 +1,6 @@
+{
+  "method": "POST",
+  "url": "/auth/email-certification",
+  "contentType": "application/json",
+  "auth": false
+}

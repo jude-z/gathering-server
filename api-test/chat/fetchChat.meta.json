@@ -1,0 +1,5 @@
+{
+  "method": "GET",
+  "url": "/chat/{chatId}",
+  "auth": true
+}

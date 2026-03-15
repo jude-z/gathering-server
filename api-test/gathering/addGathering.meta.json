@@ -1,0 +1,7 @@
+{
+  "method": "POST",
+  "url": "/gathering",
+  "contentType": "multipart/form-data",
+  "auth": true,
+  "parts": ["addGatheringRequest (json)", "file (image)"]
+}

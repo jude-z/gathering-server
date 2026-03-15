@@ -1,0 +1,5 @@
+{
+  "method": "GET",
+  "url": "/gathering/{gatheringId}/meeting/{meetingId}",
+  "auth": false
+}

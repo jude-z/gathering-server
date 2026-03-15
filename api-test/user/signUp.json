@@ -1,0 +1,9 @@
+{
+  "username": "john123",
+  "password": "password123!",
+  "email": "john@example.com",
+  "address": "123 Main St, Seoul",
+  "age": 28,
+  "hobby": "hiking",
+  "nickname": "johndoe"
+}

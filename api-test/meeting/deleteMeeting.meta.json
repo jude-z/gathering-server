@@ -1,0 +1,5 @@
+{
+  "method": "DELETE",
+  "url": "/gathering/{gatheringId}/meeting/{meetingId}",
+  "auth": true
+}

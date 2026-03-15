@@ -1,0 +1,5 @@
+{
+  "method": "POST",
+  "url": "/chat/{chatId}",
+  "auth": true
+}

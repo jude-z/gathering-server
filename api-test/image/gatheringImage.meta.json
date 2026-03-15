@@ -1,0 +1,6 @@
+{
+  "method": "GET",
+  "url": "/gathering/{gatheringId}/image",
+  "auth": false,
+  "queryParam": ["pageNum", "pageSize"]
+}

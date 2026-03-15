@@ -1,0 +1,6 @@
+{
+  "method": "GET",
+  "url": "/messages/{chatId}",
+  "auth": true,
+  "queryParam": ["pageNum", "pageSize"]
+}

@@ -1,0 +1,5 @@
+{
+  "method": "PATCH",
+  "url": "/alarm/{id}",
+  "auth": true
+}

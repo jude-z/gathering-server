@@ -1,0 +1,7 @@
+{
+  "method": "PUT",
+  "url": "/auth/update/{userId}",
+  "contentType": "multipart/form-data",
+  "auth": true,
+  "parts": ["updateRequest (json)", "file (image, optional)"]
+}

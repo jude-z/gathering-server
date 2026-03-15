@@ -1,0 +1,5 @@
+{
+  "method": "POST",
+  "url": "/chat/disAttend/{chatId}",
+  "auth": true
+}

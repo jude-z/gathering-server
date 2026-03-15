@@ -1,0 +1,7 @@
+{
+  "method": "POST",
+  "url": "/gathering/{gatheringId}/board",
+  "contentType": "multipart/form-data",
+  "auth": true,
+  "parts": ["addBoardRequest (json)", "files (images)"]
+}

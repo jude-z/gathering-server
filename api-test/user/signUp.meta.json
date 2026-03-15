@@ -1,0 +1,7 @@
+{
+  "method": "POST",
+  "url": "/auth/sign-up",
+  "contentType": "multipart/form-data",
+  "auth": false,
+  "parts": ["signUpRequest (json)", "file (image)"]
+}

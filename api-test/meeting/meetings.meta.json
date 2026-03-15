@@ -1,0 +1,6 @@
+{
+  "method": "GET",
+  "url": "/gathering/{gatheringId}/meetings",
+  "auth": false,
+  "queryParam": ["pageNum", "pageSize"]
+}

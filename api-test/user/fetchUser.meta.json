@@ -1,0 +1,5 @@
+{
+  "method": "GET",
+  "url": "/auth/user/{userId}",
+  "auth": false
+}

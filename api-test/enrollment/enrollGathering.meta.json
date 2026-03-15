@@ -1,0 +1,5 @@
+{
+  "method": "PATCH",
+  "url": "/gathering/{gatheringId}/participate",
+  "auth": true
+}

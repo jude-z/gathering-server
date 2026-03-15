@@ -1,0 +1,5 @@
+{
+  "method": "POST",
+  "url": "/gathering/{gatheringId}/meeting/{meetingId}/attend",
+  "auth": true
+}
