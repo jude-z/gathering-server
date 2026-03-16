@@ -7,6 +7,7 @@ import api.response.ApiDataResponse;
 import api.response.ApiResponse;
 import api.service.image.ImageUploadService;
 import infra.repository.dto.jdbc.gathering.GatheringDetailProjection;
+import infra.repository.dto.jdbc.gathering.MainGatheringsProjection;
 import infra.repository.dto.querydsl.QueryDslPageResponse;
 import infra.repository.dto.querydsl.gathering.GatheringsProjection;
 import infra.repository.dto.querydsl.gathering.ParticipatedProjection;
@@ -123,14 +124,16 @@ public class GatheringService {
     }
 
     public ApiResponse gatherings() {
-        List<GatheringsProjection> gatheringsProjections = CategoryUtil.list.stream()
-                .map(jdbcGatheringRepository::subGatherings)
-                .flatMap(List::stream)
-                .map(GatheringsProjection::of)
-                .toList();
-        List<MainGatheringElement> mainGatheringElements = gatheringsProjections.stream()
-                .map(projection -> MainGatheringElement.from(projection, url -> path + url))
-                .toList();
+
+//        List<GatheringsProjection> gatheringsProjections = CategoryUtil.list.stream()
+//                .map(jdbcGatheringRepository::subGatherings)
+//                .flatMap(List::stream)
+//                .map(GatheringsProjection::of)
+//                .toList();
+//        List<MainGatheringElement> mainGatheringElements = gatheringsProjections.stream()
+//                .map(projection -> MainGatheringElement.from(projection, url -> path + url))
+//                .toList();
+        List<MainGatheringsProjection> mainGatheringElements = jdbcGatheringRepository.gatherings();
         Map<String, CategoryTotalGatherings> map = categorizeByCategory(mainGatheringElements);
         return toMainGatheringResponse(map);
     }
@@ -149,13 +152,24 @@ public class GatheringService {
         return ApiDataResponse.of(content,Status.SUCCESS);
     }
 
-    private Map<String, CategoryTotalGatherings> categorizeByCategory(List<MainGatheringElement> mainGatheringElements) {
+//    private Map<String, CategoryTotalGatherings> categorizeByCategory(List<MainGatheringElement> mainGatheringElements) {
+//        return mainGatheringElements.stream()
+//                .collect(Collectors.groupingBy(
+//                        MainGatheringElement::getCategory,
+//                        Collectors.collectingAndThen(
+//                                Collectors.toList(),
+//                                this::processCategoryElements
+//                        )
+//                ));
+//    }
+
+    private Map<String, CategoryTotalGatherings> categorizeByCategory(List<MainGatheringsProjection> mainGatheringElements) {
         return mainGatheringElements.stream()
                 .collect(Collectors.groupingBy(
-                        MainGatheringElement::getCategory,
+                        MainGatheringsProjection::getCategory,
                         Collectors.collectingAndThen(
                                 Collectors.toList(),
-                                this::processCategoryElements
+                                this::processCategoryProjections
                         )
                 ));
     }
@@ -185,6 +199,22 @@ public class GatheringService {
             return gatheringResponse;
     }
 
+
+    private CategoryTotalGatherings processCategoryProjections(List<MainGatheringsProjection> projections) {
+            List<MainGatheringElement> elements = projections.stream()
+                    .map(p -> MainGatheringElement.builder()
+                            .id(p.getId())
+                            .title(p.getTitle())
+                            .content(p.getContent())
+                            .registerDate(p.getRegisterDate())
+                            .category(p.getCategory())
+                            .createdBy(p.getCreatedBy())
+                            .url(path + p.getUrl())
+                            .count(p.getCount())
+                            .build())
+                    .toList();
+            return processCategoryElements(elements);
+    }
 
     private CategoryTotalGatherings processCategoryElements(List<MainGatheringElement> elements) {
             boolean hasNext = elements.size() >= 9;

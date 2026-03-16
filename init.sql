@@ -47,7 +47,8 @@ CREATE TABLE IF NOT EXISTS enrollment (
     user_id BIGINT,
     date DATETIME(6),
     FOREIGN KEY (gathering_id) REFERENCES gathering(id),
-    FOREIGN KEY (user_id) REFERENCES `user`(id)
+    FOREIGN KEY (user_id) REFERENCES `user`(id),
+    UNIQUE KEY uk_enrollment_gathering_user (gathering_id, user_id)
 );
 
 CREATE TABLE IF NOT EXISTS meeting (
@@ -142,7 +143,8 @@ CREATE TABLE IF NOT EXISTS chat_participant (
     chat_room_id BIGINT,
     status BOOLEAN DEFAULT TRUE,
     FOREIGN KEY (user_id) REFERENCES `user`(id),
-    FOREIGN KEY (chat_room_id) REFERENCES chat_room(id)
+    FOREIGN KEY (chat_room_id) REFERENCES chat_room(id),
+    UNIQUE KEY uk_chat_participant_user_room (user_id, chat_room_id)
 );
 
 CREATE TABLE IF NOT EXISTS chat_message (

@@ -19,11 +19,33 @@ public class JdbcGatheringRepository {
     }
 
     public List<GatheringDetailProjection> gatheringDetail(Long gatheringId) {
+//        String sql = "select " +
+//                "g.id as id, g.title as title, g.content as content, g.register_date as registerDate, " +
+//                "ca.name as category, cr.username as createdBy, crm.url as createdByUrl, " +
+//                "u.username as participatedBy, u.nickname as participatedByNickname, " +
+//                "pm.url as participatedByUrl, im.url as url, g.count as count " +
+//                "from gathering g " +
+//                "join category ca on ca.id = g.category_id " +
+//                "join user cr on g.user_id = cr.id " +
+//                "join image crm on cr.image_id = crm.id " +
+//                "join image im on g.image_id = im.id " +
+//                "left join " +
+//                "(select e.* " +
+//                "from enrollment e " +
+//                "left join user u on u.id = e.user_id " +
+//                "left join gathering ge on ge.id = e.gathering_id and ge.id = ? " +
+//                "order by u.id " +
+//                "limit 10) " +
+//                "e on e.gathering_id = g.id " +
+//                "left join user u on u.id = e.user_id " +
+//                "left join image pm on u.image_id = pm.id " +
+//                "where g.id = ? " +
+//                "order by u.id";
         String sql = "select " +
                 "g.id as id, g.title as title, g.content as content, g.register_date as registerDate, " +
                 "ca.name as category, cr.username as createdBy, crm.url as createdByUrl, " +
                 "u.username as participatedBy, u.nickname as participatedByNickname, " +
-                "pm.url as participatedByUrl, im.url as url, g.count as count " +
+                "pm.url as participatedByUrl, im.url as url, ec.count as count " +
                 "from gathering g " +
                 "join category ca on ca.id = g.category_id " +
                 "join user cr on g.user_id = cr.id " +
@@ -32,19 +54,21 @@ public class JdbcGatheringRepository {
                 "left join " +
                 "(select e.* " +
                 "from enrollment e " +
-                "left join user u on u.id = e.user_id " +
-                "left join gathering ge on ge.id = e.gathering_id and ge.id = ? " +
-                "order by u.id " +
+                "where e.gathering_id = ? " +
+                "order by e.user_id " +
                 "limit 10) " +
                 "e on e.gathering_id = g.id " +
                 "left join user u on u.id = e.user_id " +
                 "left join image pm on u.image_id = pm.id " +
+                "left join (select count(*) as count, gathering_id from enrollment where gathering_id = ? group by gathering_id) ec " +
+                "on ec.gathering_id = g.id " +
                 "where g.id = ? " +
                 "order by u.id";
         return jdbcTemplate.query(con -> {
             PreparedStatement pstmt = con.prepareStatement(sql);
             pstmt.setLong(1, gatheringId);
             pstmt.setLong(2, gatheringId);
+            pstmt.setLong(3, gatheringId);
             return pstmt;
         }, gatheringDetailRowMapper());
     }
@@ -52,12 +76,14 @@ public class JdbcGatheringRepository {
     public List<MainGatheringsProjection> gatherings() {
         String sql = "select id, title, content, registerDate, category, createdBy, url, count from ( " +
                 "  select g.id as id, g.title as title, g.content as content, g.register_date as registerDate, ca.name as category, " +
-                "         cr.username as createdBy, im.url as url, g.count as count, " +
+                "         cr.username as createdBy, im.url as url, ec.count as count, " +
                 "         row_number() over (partition by ca.name order by g.count desc) as rownum " +
                 "  from gathering g " +
                 "  left join category ca on g.category_id = ca.id " +
                 "  left join user cr on g.user_id = cr.id " +
                 "  left join image im on g.image_id = im.id " +
+                "  left join (select count(*) as count, gathering_id from enrollment group by gathering_id) ec " +
+                "  on ec.gathering_id = g.id" +
                 ") as subquery " +
                 "where rownum between 1 and 9";
         return jdbcTemplate.query(con -> con.prepareStatement(sql), mainGatheringsRowMapper());
