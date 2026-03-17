@@ -60,7 +60,7 @@ public class JdbcGatheringRepository {
                 "e on e.gathering_id = g.id " +
                 "left join user u on u.id = e.user_id " +
                 "left join image pm on u.image_id = pm.id " +
-                "left join (select count(*) as count, gathering_id from enrollment where gathering_id = ? group by gathering_id) ec " +
+                "left join (select count(*) as count, gathering_id from enrollment where gathering_id = ? and accepted = true group by gathering_id) ec " +
                 "on ec.gathering_id = g.id " +
                 "where g.id = ? " +
                 "order by u.id";
@@ -82,7 +82,7 @@ public class JdbcGatheringRepository {
                 "  left join category ca on g.category_id = ca.id " +
                 "  left join user cr on g.user_id = cr.id " +
                 "  left join image im on g.image_id = im.id " +
-                "  left join (select count(*) as count, gathering_id from enrollment group by gathering_id) ec " +
+                "  left join (select count(*) as count, gathering_id from enrollment where accepted = true group by gathering_id) ec " +
                 "  on ec.gathering_id = g.id" +
                 ") as subquery " +
                 "where rownum between 1 and 9";
