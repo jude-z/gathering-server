@@ -1,0 +1,25 @@
+global:
+  scrape_interval: 15s # 15초마다 데이터를 수집합니다.
+  evaluation_interval: 15s
+
+scrape_configs:
+  # 1. Redis 모니터링
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis-exporter:9121']
+
+  # 2. Kafka 모니터링
+  - job_name: 'kafka'
+    static_configs:
+      - targets: ['kafka-exporter:9308']
+
+  # 3. Spring Boot 애플리케이션 (로컬 실행 중인 경우)
+  - job_name: 'spring-boot-app'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['host.docker.internal:8080']
+
+  # 4. Prometheus 자체 상태 모니터링
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']

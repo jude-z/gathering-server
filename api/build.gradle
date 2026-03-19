@@ -3,6 +3,6 @@ dependencies {
     implementation project(':infra')
     implementation project(':common:page')
     implementation project(':common:util')
-    implementation 'org.springframework.boot:spring-boot-docker-compose'
+//    implementation 'org.springframework.boot:spring-boot-docker-compose'
 
 }

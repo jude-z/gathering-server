@@ -54,6 +54,18 @@ public class GatheringController {
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
+    @GetMapping("/v2/gatherings")
+    public ResponseEntity<ApiResponse> gatheringsV2(){
+        ApiResponse apiResponse = gatheringService.gatheringsV2();
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+    @GetMapping("/v3/gatherings")
+    public ResponseEntity<ApiResponse> gatheringsV3(){
+        ApiResponse apiResponse = gatheringService.gatheringsV3();
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
     @GetMapping("/gathering")
     public ResponseEntity<ApiResponse> gatheringCategory(@RequestParam String category,
                                                          @RequestParam(defaultValue = "1") Integer pageNum,

@@ -8,6 +8,7 @@ import api.response.ApiResponse;
 import api.service.image.ImageUploadService;
 import infra.repository.dto.jdbc.gathering.GatheringDetailProjection;
 import infra.repository.dto.jdbc.gathering.MainGatheringsProjection;
+import infra.repository.dto.jdbc.gathering.MainGatheringsProjectionV2;
 import infra.repository.dto.querydsl.QueryDslPageResponse;
 import infra.repository.dto.querydsl.gathering.GatheringsProjection;
 import infra.repository.dto.querydsl.gathering.ParticipatedProjection;
@@ -138,6 +139,64 @@ public class GatheringService {
         return toMainGatheringResponse(map);
     }
 
+    public ApiResponse gatheringsV2() {
+        List<MainGatheringsProjectionV2> projections = jdbcGatheringRepository.gatheringsV2();
+
+        List<Long> gatheringIds = projections.stream()
+                .map(MainGatheringsProjectionV2::getId)
+                .toList();
+        Map<Long, Integer> enrollmentCounts = jdbcGatheringRepository.gatheringEnrollmentCounts(gatheringIds);
+
+        Map<Long, String> categoryNameMap = categoryRepository.findAll().stream()
+                .collect(Collectors.toMap(Category::getId, Category::getName));
+
+        List<MainGatheringsProjection> mainGatheringElements = projections.stream()
+                .map(p -> MainGatheringsProjection.builder()
+                        .id(p.getId())
+                        .title(p.getTitle())
+                        .content(p.getContent())
+                        .registerDate(p.getRegisterDate())
+                        .category(categoryNameMap.getOrDefault(p.getCategoryId(), "unknown"))
+                        .createdBy(p.getCreatedBy())
+                        .url(p.getUrl())
+                        .count(enrollmentCounts.getOrDefault(p.getId(), 0))
+                        .build())
+                .toList();
+
+        Map<String, CategoryTotalGatherings> map = categorizeByCategory(mainGatheringElements);
+        return toMainGatheringResponse(map);
+    }
+
+    public ApiResponse gatheringsV3() {
+        Map<Long, String> categoryNameMap = categoryRepository.findAll().stream()
+                .collect(Collectors.toMap(Category::getId, Category::getName));
+
+        List<MainGatheringsProjectionV2> projections = categoryNameMap.keySet().stream()
+                .flatMap(categoryId -> jdbcGatheringRepository.gatheringsV3(categoryId).stream())
+                .toList();
+
+        List<Long> gatheringIds = projections.stream()
+                .map(MainGatheringsProjectionV2::getId)
+                .toList();
+        Map<Long, Integer> enrollmentCounts = jdbcGatheringRepository.gatheringEnrollmentCounts(gatheringIds);
+
+        List<MainGatheringsProjection> mainGatheringElements = projections.stream()
+                .map(p -> MainGatheringsProjection.builder()
+                        .id(p.getId())
+                        .title(p.getTitle())
+                        .content(p.getContent())
+                        .registerDate(p.getRegisterDate())
+                        .category(categoryNameMap.getOrDefault(p.getCategoryId(), "unknown"))
+                        .createdBy(p.getCreatedBy())
+                        .url(p.getUrl())
+                        .count(enrollmentCounts.getOrDefault(p.getId(), 0))
+                        .build())
+                .toList();
+
+        Map<String, CategoryTotalGatherings> map = categorizeByCategory(mainGatheringElements);
+        return toMainGatheringResponse(map);
+    }
+
     public ApiResponse participated(Long gatheringId,Integer pageNum,Integer pageSize) {
         PageableInfo pageableInfo = PageCalculator.toPageableInfo(pageNum, pageSize);
         QueryDslPageResponse<ParticipatedProjection> queryDslPageResponse = queryDslGatheringRepository.gatheringParticipated(pageableInfo, gatheringId);
@@ -151,17 +210,6 @@ public class GatheringService {
                 .toList();
         return ApiDataResponse.of(content,Status.SUCCESS);
     }
-
-//    private Map<String, CategoryTotalGatherings> categorizeByCategory(List<MainGatheringElement> mainGatheringElements) {
-//        return mainGatheringElements.stream()
-//                .collect(Collectors.groupingBy(
-//                        MainGatheringElement::getCategory,
-//                        Collectors.collectingAndThen(
-//                                Collectors.toList(),
-//                                this::processCategoryElements
-//                        )
-//                ));
-//    }
 
     private Map<String, CategoryTotalGatherings> categorizeByCategory(List<MainGatheringsProjection> mainGatheringElements) {
         return mainGatheringElements.stream()
