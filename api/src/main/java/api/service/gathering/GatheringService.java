@@ -19,6 +19,7 @@ import entity.image.Image;
 import entity.user.User;
 import exception.CommonException;
 import exception.Status;
+import infra.redis.service.GatheringCacheService;
 import infra.repository.gathering.JdbcGatheringRepository;
 import infra.repository.category.CategoryRepository;
 import infra.repository.enrollment.EnrollmentRepository;
@@ -59,6 +60,7 @@ public class GatheringService {
     private final QueryDslCategoryRepository queryDslCategoryRepository;
     private final QueryDslGatheringRepository queryDslGatheringRepository;
     private final JdbcGatheringRepository jdbcGatheringRepository;
+    private final GatheringCacheService gatheringCacheService;
     private final ImageUploadService imageUploadService;
     @Value("${file.path}")
     private String path;
@@ -195,6 +197,45 @@ public class GatheringService {
 
         Map<String, CategoryTotalGatherings> map = categorizeByCategory(mainGatheringElements);
         return toMainGatheringResponse(map);
+    }
+
+    public ApiResponse gatheringsV4() {
+        List<MainGatheringsProjection> mainGatheringElements = gatheringCacheService.getOrLoadSimple(this::loadGatheringsFromDb);
+        Map<String, CategoryTotalGatherings> map = categorizeByCategory(mainGatheringElements);
+        return toMainGatheringResponse(map);
+    }
+
+    public ApiResponse gatheringsV5() {
+        List<MainGatheringsProjection> mainGatheringElements = gatheringCacheService.getOrLoad(this::loadGatheringsFromDb);
+        Map<String, CategoryTotalGatherings> map = categorizeByCategory(mainGatheringElements);
+        return toMainGatheringResponse(map);
+    }
+
+    private List<MainGatheringsProjection> loadGatheringsFromDb() {
+        Map<Long, String> categoryNameMap = categoryRepository.findAll().stream()
+                .collect(Collectors.toMap(Category::getId, Category::getName));
+
+        List<MainGatheringsProjectionV2> projections = categoryNameMap.keySet().stream()
+                .flatMap(categoryId -> jdbcGatheringRepository.gatheringsV3(categoryId).stream())
+                .toList();
+
+        List<Long> gatheringIds = projections.stream()
+                .map(MainGatheringsProjectionV2::getId)
+                .toList();
+        Map<Long, Integer> enrollmentCounts = jdbcGatheringRepository.gatheringEnrollmentCounts(gatheringIds);
+
+        return projections.stream()
+                .map(p -> MainGatheringsProjection.builder()
+                        .id(p.getId())
+                        .title(p.getTitle())
+                        .content(p.getContent())
+                        .registerDate(p.getRegisterDate())
+                        .category(categoryNameMap.getOrDefault(p.getCategoryId(), "unknown"))
+                        .createdBy(p.getCreatedBy())
+                        .url(p.getUrl())
+                        .count(enrollmentCounts.getOrDefault(p.getId(), 0))
+                        .build())
+                .toList();
     }
 
     public ApiResponse participated(Long gatheringId,Integer pageNum,Integer pageSize) {

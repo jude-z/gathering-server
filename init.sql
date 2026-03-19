@@ -173,3 +173,12 @@ CREATE TABLE IF NOT EXISTS outbox (
     created_at DATETIME(6),
     processed BOOLEAN DEFAULT FALSE
 );
+
+CREATE TABLE IF NOT EXISTS gathering_cache (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    cache_key VARCHAR(255) NOT NULL UNIQUE,
+    data JSON NOT NULL,
+    expired_at DATETIME(6) NOT NULL,
+    created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    INDEX idx_cache_key_expired (cache_key, expired_at)
+);
