@@ -1,141 +1,76 @@
 # Gathering Server
 
-A community gathering and meetup platform backend built with Spring Boot. Users can create and join gatherings, schedule meetings, chat in real-time, and receive push notifications.
+지역 기반 소모임 플랫폼의 백엔드 서버로, 모임 생성/참여부터 실시간 채팅, 일정 관리, 알림까지 소모임 운영에 필요한 핵심 기능을 제공합니다.
 
-## Tech Stack
+## 프로젝트 목표
 
-- **Language:** Java 21
-- **Framework:** Spring Boot 3.4.2
-- **Database:** MySQL, Redis
-- **ORM:** Spring Data JPA, QueryDSL
-- **Messaging:** RabbitMQ (chat), Firebase Cloud Messaging (push notifications)
-- **WebSocket:** STOMP over SockJS
-- **Storage:** AWS S3
-- **Security:** Spring Security + JWT
-- **Build:** Gradle (multi-module)
-- **Deployment:** Docker, GitHub Actions, AWS EC2
+- 단순 CRUD를 넘어 **대용량 트래픽을 고려한 서버 구조** 설계
+- **Redis 캐싱 전략**(Soft/Hard TTL, 분산락, DB Fallback)을 통한 응답 속도 최적화
+- **Kafka 기반 비동기 메시징**과 Outbox 패턴을 활용한 데이터 정합성 보장
+- JPA, QueryDSL, JDBC Template을 상황에 맞게 사용하여 **쿼리 성능 튜닝**
+- 멀티모듈 구조를 통한 **관심사 분리**와 유지보수성 확보
+- 코드 리뷰를 통한 코드 품질 향상 및 이유 있는 기술 선택
 
-## Project Structure
+## 사용 기술
+
+<img src="docs/images/tech-stack.png" alt="Tech Stack" width="800"/>
+
+## 프로젝트 구조
 
 ```
 gathering-server/
-├── api/             # REST controllers and web layer
-├── domain/          # JPA entities and domain models
-├── infra/           # Repositories (JPA, QueryDSL, JDBC), Redis, FCM config
-├── util/            # Utility classes and interfaces
-├── common/          # Shared configurations
-├── mailserver-server/     # Email service (separate Spring Boot app)
-├── chat-server/     # Chat module
-└── src/             # Core services, security, WebSocket, RabbitMQ config
+├── api/              # REST API, Security, Service (port 8080)
+├── domain/           # JPA Entity (순수 도메인, 외부 의존성 없음)
+├── infra/            # Repository (JPA/QueryDSL/JDBC), Redis, Kafka
+├── chat-server/      # 실시간 채팅 서버 (WebSocket STOMP, port 8081)
+└── common/           # 페이지네이션, 유틸리티, 이벤트 공통 모듈
 ```
 
-## Features
+## 아키텍처
 
-- **User Management** — Registration, JWT authentication, email verification, profile management
-- **Gatherings** — Create/join community groups with category filtering and pagination
-- **Meetings** — Schedule events within gatherings with attendance tracking
-- **Real-time Chat** — WebSocket (STOMP) chat rooms with RabbitMQ message routing and read status tracking
-- **Push Notifications** — Firebase FCM with topic-based subscriptions
-- **Board** — Discussion posts with image attachments
-- **Likes & Recommendations** — Like gatherings and get top-10 recommendations
-- **Image Upload** — AWS S3 integration for profile and gathering images
-- **Email Notifications** — Async email processing via dedicated mailserver server
-- **SSE** — Server-Sent Events for real-time failure notifications
+<img src="docs/images/system-architecture.png" alt="System Architecture" width="800"/>
 
-## API Endpoints
+## 핵심 기술적 고민
 
-### Authentication
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/auth/sign-up` | Register a new user |
-| POST | `/auth/sign-in` | Login |
-| POST | `/auth/id-check` | Check username availability |
-| POST | `/auth/nickname-check` | Check nickname availability |
-| PUT | `/auth/update/{userId}` | Update profile |
-| GET | `/auth/user/{userId}` | Get user details |
-| POST | `/auth/email-certification` | Send email verification |
-| POST | `/auth/check-certification` | Verify email code |
-| POST | `/auth/generateToken` | Refresh JWT token |
+### 1. Redis 캐싱 전략 - Soft/Hard TTL + 분산락
 
-### Gatherings
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/gathering` | Create a gathering |
-| PUT | `/gathering/{id}` | Update a gathering |
-| GET | `/gathering/{id}` | Get gathering details |
-| GET | `/gatherings` | List all gatherings |
-| GET | `/gathering` | Filter by category (paginated) |
-| PATCH | `/gathering/{id}/participate` | Join a gathering |
-| PATCH | `/gathering/{id}/disParticipate` | Leave a gathering |
-| PATCH | `/gathering/{id}/permit/{enrollmentId}` | Approve enrollment |
-| GET | `/gathering/participated/{id}` | List participants |
+<img src="docs/images/redis-caching-strategy.png" alt="Redis Caching Strategy" width="800"/>
 
-### Meetings
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/gathering/{id}/meeting` | Create a meeting |
-| GET | `/gathering/{id}/meeting/{meetingId}` | Get meeting details |
-| PUT | `/gathering/{id}/meeting/{meetingId}` | Update a meeting |
-| DELETE | `/gathering/{id}/meeting/{meetingId}` | Delete a meeting |
-| GET | `/gathering/{id}/meetings` | List meetings |
-| POST | `/gathering/{id}/meeting/{meetingId}/attend` | Attend a meeting |
-| POST | `/gathering/{id}/meeting/{meetingId}/disAttend` | Cancel attendance |
+- **문제**: 캐시 만료 시 다수 요청이 동시에 DB를 조회하는 Thundering Herd 문제
+- **해결**: Soft TTL(55분)에 도달하면 Redisson 분산락을 획득한 1개 스레드만 DB 조회 후 캐시 갱신, 나머지는 기존 캐시 반환
+- **Fallback**: Redis 장애 시 `gathering_cache` 테이블을 DB 기반 캐시로 활용
+- **모니터링**: Prometheus 메트릭으로 캐시 히트/미스율 추적
 
-### Chat
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/gathering/{id}/chat` | Create a chat room |
-| GET | `/gathering/{id}/chats` | List chat rooms in a gathering |
-| GET | `/my/chats` | List my chat rooms |
-| POST | `/chat/attend/{chatId}` | Join a chat room |
-| POST | `/chat/disAttend/{chatId}` | Leave a chat room |
-| GET | `/messages/{chatId}` | Get unread messages |
-| POST | `/chat/{chatId}` | Mark messages as read |
+### 2. 쿼리 성능 최적화 (v1 → v4)
 
-**WebSocket:** Connect via `/connect` (SockJS), publish to `/publish/chatRoom/{chatRoomId}`
+<img src="docs/images/query-optimization.png" alt="Query Optimization" width="800"/>
 
-### Board
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/gathering/{id}/board` | Create a post |
-| GET | `/gathering/{id}/board/{boardId}` | Get a post |
-| GET | `/gathering/{id}/boards` | List posts |
+### 3. Kafka + Outbox 패턴
 
-### Likes & Recommendations
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| PATCH | `/gathering/{id}/like` | Like a gathering |
-| PATCH | `/gathering/{id}/dislike` | Unlike a gathering |
-| POST | `/gatherings/like` | Get liked gatherings |
-| GET | `/recommend` | Get top 10 recommendations |
+<img src="docs/images/kafka-outbox-pattern.png" alt="Kafka + Outbox Pattern" width="800"/>
 
-### Alarms
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/alarm` | Get alarms |
-| PATCH | `/alarm/{id}` | Mark as checked |
-| DELETE | `/alarm/{id}` | Delete an alarm |
+- **문제**: 채팅 메시지 발행과 DB 저장 간의 데이터 정합성
+- **해결**: 트랜잭션 내에서 Outbox 테이블에 이벤트 저장 → 스케줄러가 10초마다 미발행 이벤트를 Kafka로 발행
+- **비동기 처리**: 20~50 스레드풀로 Kafka 메시지 비동기 발행
 
-### Images
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/image/{imageUrl}` | Download an image |
-| GET | `/gathering/{id}/image` | Get gathering images |
+### 4. 멀티모듈 설계
+- `domain` 모듈은 외부 의존성 없이 순수 엔티티만 포함 → 도메인 오염 방지
+- `infra` 모듈이 모든 데이터 접근 기술(JPA, QueryDSL, JDBC, Redis, Kafka)을 캡슐화
+- `api` 모듈은 비즈니스 로직과 외부 인터페이스에만 집중
 
-## Architecture
+## 주요 기능
 
-```
-Controller → Service → Repository → Entity
-                ↕              ↕
-           RabbitMQ         QueryDSL
-           Firebase          Redis
-            AWS S3
-```
-
-- **Multi-module Gradle** — Separation of concerns across API, Domain, Infrastructure, and Utility layers
-- **Event-driven** — RabbitMQ for async chat message routing
-- **Distributed scheduling** — ShedLock for safe scheduled task execution
-- **Custom annotations** — `@Username` for JWT-based user resolution from security context
+| 기능 | 설명 |
+|------|------|
+| 모임 관리 | 카테고리별 모임 생성/수정, 페이지네이션, 참여/탈퇴, 가입 승인 |
+| 일정 관리 | 모임 내 일정 생성, 출석 체크 |
+| 실시간 채팅 | WebSocket(STOMP) + Kafka 기반 채팅, 읽음 상태 추적 |
+| 추천 시스템 | 일별 TOP 10 모임 추천 |
+| 좋아요 | 모임 좋아요/취소 |
+| 게시판 | 모임 내 게시글 작성, 이미지 첨부 |
+| 알림 | 알림 조회/확인/삭제 |
+| 인증 | JWT 기반 인증, 이메일 인증, 토큰 갱신 |
+| 이미지 | AWS S3 업로드/다운로드 |
 
 ## Getting Started
 
@@ -143,21 +78,16 @@ Controller → Service → Repository → Entity
 - Java 21
 - MySQL
 - Redis
-- RabbitMQ
-- AWS S3 bucket
-- Firebase project (for FCM)
+- Apache Kafka
+- AWS S3 Bucket
 
 ### Run Locally
 
 ```bash
-# Clone the repository
 git clone https://github.com/<your-username>/gathering-server.git
 cd gathering-server
 
-# Configure application properties
-# Set up api/src/main/resources/application.yml with your database, Redis, RabbitMQ, AWS, and Firebase credentials
-
-# Build and run
+# application.yml 설정 (DB, Redis, Kafka, AWS, JWT)
 ./gradlew clean build -x test
 java -jar api/build/libs/*.jar
 ```
@@ -169,10 +99,9 @@ docker build -t gathering-server .
 docker run -p 80:80 gathering-server
 ```
 
-## Deployment
+## CI/CD
 
-CI/CD is configured via GitHub Actions (`.github/workflows/deploy.yml`):
-1. Triggers on push to `master`
-2. Builds with JDK 21 (Amazon Corretto)
-3. Injects secrets for configuration files
-4. Deploys to AWS EC2 via SCP + SSH
+GitHub Actions를 통한 자동 배포:
+1. `master` 브랜치 push 시 트리거
+2. JDK 21 (Amazon Corretto) 빌드
+3. AWS EC2로 SCP + SSH 배포

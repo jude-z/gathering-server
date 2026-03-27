@@ -5,7 +5,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import infra.repository.dto.jdbc.gathering.MainGatheringsProjection;
-import lombok.RequiredArgsConstructor;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
@@ -27,6 +28,8 @@ public class GatheringCacheService {
     private final RedisTemplate<String, String> redisTemplate;
     private final RedissonClient redissonClient;
     private final JdbcTemplate jdbcTemplate;
+    private final Counter cacheHitCounter;
+    private final Counter cacheMissCounter;
 
     private static final String CACHE_KEY = "gatherings:cache";
     private static final String LOCK_KEY = "lock:gatherings:cache";
@@ -38,23 +41,33 @@ public class GatheringCacheService {
 
     public GatheringCacheService(RedisTemplate<String, String> redisTemplate,
                                   RedissonClient redissonClient,
-                                  DataSource dataSource) {
+                                  DataSource dataSource,
+                                  MeterRegistry meterRegistry) {
         this.redisTemplate = redisTemplate;
         this.redissonClient = redissonClient;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.cacheHitCounter = Counter.builder("gathering_cache_hit")
+                .description("Gathering cache hit count")
+                .register(meterRegistry);
+        this.cacheMissCounter = Counter.builder("gathering_cache_miss")
+                .description("Gathering cache miss count")
+                .register(meterRegistry);
     }
 
     public List<MainGatheringsProjection> getOrLoadSimple(Supplier<List<MainGatheringsProjection>> dbLoader) {
         try {
             String cached = redisTemplate.opsForValue().get(CACHE_KEY);
             if (cached != null) {
+                cacheHitCounter.increment();
                 return deserialize(cached);
             }
+            cacheMissCounter.increment();
             List<MainGatheringsProjection> result = dbLoader.get();
             redisTemplate.opsForValue().set(CACHE_KEY, serialize(result), CACHE_TTL);
             saveToDbCache(serialize(result));
             return result;
         } catch (Exception e) {
+            cacheMissCounter.increment();
             log.warn("Redis failed, fallback to DB cache", e);
             return getFromDbCacheOrLoad(dbLoader);
         }
@@ -65,15 +78,18 @@ public class GatheringCacheService {
         try {
             String cached = redisTemplate.opsForValue().get(CACHE_KEY);
             if (cached != null) {
+                cacheHitCounter.increment();
                 triggerRefreshIfNeeded(dbLoader);
                 return deserialize(cached);
             }
         } catch (Exception e) {
+            cacheMissCounter.increment();
             log.warn("Redis read failed, fallback to DB cache", e);
             return getFromDbCacheOrLoad(dbLoader);
         }
 
         // 2. 캐시 미스 - 락 잡고 로드
+        cacheMissCounter.increment();
         return loadWithLock(dbLoader);
     }
 

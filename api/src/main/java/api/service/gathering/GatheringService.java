@@ -200,12 +200,6 @@ public class GatheringService {
     }
 
     public ApiResponse gatheringsV4() {
-        List<MainGatheringsProjection> mainGatheringElements = gatheringCacheService.getOrLoadSimple(this::loadGatheringsFromDb);
-        Map<String, CategoryTotalGatherings> map = categorizeByCategory(mainGatheringElements);
-        return toMainGatheringResponse(map);
-    }
-
-    public ApiResponse gatheringsV5() {
         List<MainGatheringsProjection> mainGatheringElements = gatheringCacheService.getOrLoad(this::loadGatheringsFromDb);
         Map<String, CategoryTotalGatherings> map = categorizeByCategory(mainGatheringElements);
         return toMainGatheringResponse(map);
