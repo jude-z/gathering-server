@@ -5,14 +5,15 @@ import entity.enrollment.Enrollment;
 import entity.gathering.Gathering;
 import entity.user.User;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
 import static entity.enrollment.QEnrollment.*;
 import static entity.gathering.QGathering.*;
 import static entity.user.QUser.*;
-import static entity.fcm.QFCMToken.*;
 
+@Repository
 @RequiredArgsConstructor
 public class QueryDslEnrollmentRepository {
     private final JPAQueryFactory queryFactory;
@@ -29,7 +30,6 @@ public class QueryDslEnrollmentRepository {
         return Optional.ofNullable(
                 queryFactory.selectFrom(enrollment)
                         .join(enrollment.enrolledBy, user).fetchJoin()
-                        .leftJoin(user.tokens, fCMToken).fetchJoin()
                         .where(
                                 enrollment.gathering.id.eq(gatheringId),
                                 user.id.eq(userId),
@@ -42,7 +42,6 @@ public class QueryDslEnrollmentRepository {
         return Optional.ofNullable(
                 queryFactory.selectFrom(enrollment)
                         .leftJoin(enrollment.enrolledBy, user).fetchJoin()
-                        .leftJoin(user.tokens, fCMToken).fetchJoin()
                         .where(
                                 enrollment.id.eq(enrollmentId),
                                 enrollment.accepted.eq(false))

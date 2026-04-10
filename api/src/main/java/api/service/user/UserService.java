@@ -4,13 +4,13 @@ import api.common.mapper.UserMapper;
 import api.response.ApiDataResponse;
 import api.response.ApiResponse;
 import api.response.ApiStatusResponse;
+import api.security.jwt.JwtProvider;
 import api.service.image.ImageUploadService;
-import common.ImageUrlConverter;
-import util.page.PageableInfo;
 import infra.repository.dto.querydsl.QueryDslPageResponse;
 import entity.image.Image;
 import entity.user.User;
 import exception.CommonException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import infra.repository.image.ImageRepository;
 import infra.repository.user.UserRepository;
@@ -23,7 +23,9 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 import infra.repository.certification.QueryDslCertificationRepository;
 import infra.repository.user.QueryDslUserRepository;
-import util.page.PageCalculator;
+import page.PageCalculator;
+import page.PageableInfo;
+import util.ImageUrlConverter;
 
 import java.io.IOException;
 
@@ -45,6 +47,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final ImageUploadService imageUploadService;
     private final ImageUrlConverter imageUrlConverter;
+    private final JwtProvider jwtProvider;
 
 
     public ApiResponse idCheck(IdCheckRequest idCheckRequest) {
@@ -103,14 +106,18 @@ public class UserService {
             if(!matches){
                 throw new CommonException(UN_CORRECT_PASSWORD);
             }
-            return ApiStatusResponse.of(SUCCESS);
+            String accessToken = jwtProvider.createAccessToken(user);
+            String refreshToken = jwtProvider.createRefreshToken(user);
+            Cookie cookie = new Cookie("refreshToken", refreshToken);
+            cookie.setHttpOnly(true);
+            response.addCookie(cookie);
+            return ApiDataResponse.of(accessToken,SUCCESS);
     }
 
     public ApiResponse emailCertification(EmailCertificationRequest emailCertificationRequest) {
         PageableInfo pageableInfo = PageCalculator.toDefaultPageableInfo();
         QueryDslPageResponse<User> queryDslPageResponse = queryDslUserRepository.findByEmail(pageableInfo,emailCertificationRequest.getEmail());
         if(!queryDslPageResponse.isEmpty()) throw new CommonException(DUPLICATE_EMAIL);
-        //TODO: Kafka Producer
         return ApiStatusResponse.of(SUCCESS);
     }
 

@@ -2,15 +2,16 @@ package infra.repository.gathering;
 
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import util.page.PageInfo;
-import util.page.PageableInfo;
+import page.PageInfo;
+import page.PageableInfo;
 import infra.repository.dto.querydsl.QueryDslPageResponse;
 import infra.repository.dto.querydsl.gathering.GatheringsProjection;
 import infra.repository.dto.querydsl.gathering.ParticipatedProjection;
 import entity.gathering.Gathering;
 import entity.user.QUser;
 import lombok.RequiredArgsConstructor;
-import util.page.PageCalculator;
+import org.springframework.stereotype.Repository;
+import page.PageCalculator;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -18,14 +19,13 @@ import java.util.Optional;
 
 import static entity.category.QCategory.*;
 import static entity.enrollment.QEnrollment.*;
-import static entity.fcm.QFCMToken.*;
-import static entity.fcm.QTopic.*;
 import static entity.gathering.QGathering.*;
 import static entity.image.QImage.*;
 import static entity.like.QLike.*;
 import static entity.recommend.QRecommend.*;
 import static entity.user.QUser.*;
 
+@Repository
 @RequiredArgsConstructor
 public class QueryDslGatheringRepository {
     private final JPAQueryFactory queryFactory;
@@ -156,36 +156,12 @@ public class QueryDslGatheringRepository {
         return QueryDslPageResponse.of(content, pageInfo);
     }
 
-    // === findTopicById ===
+    // === findGatheringFetchCreatedBy ===
 
-    public Optional<Gathering> findTopicById(Long gatheringId) {
-        return Optional.ofNullable(
-                queryFactory.selectFrom(gathering)
-                        .leftJoin(gathering.topic, topic).fetchJoin()
-                        .where(gathering.id.eq(gatheringId))
-                        .fetchOne()
-        );
-    }
-
-    // === findGatheringFetchCreatedByAndTokensId ===
-
-    public Optional<Gathering> findGatheringFetchCreatedByAndTokensId(Long gatheringId) {
+    public Optional<Gathering> findGatheringFetchCreatedBy(Long gatheringId) {
         return Optional.ofNullable(
                 queryFactory.selectFrom(gathering)
                         .leftJoin(gathering.createBy, user).fetchJoin()
-                        .leftJoin(user.tokens, fCMToken).fetchJoin()
-                        .where(gathering.id.eq(gatheringId))
-                        .fetchOne()
-        );
-    }
-
-    // === findGatheringFetchCreatedAndTopicBy ===
-
-    public Optional<Gathering> findGatheringFetchCreatedAndTopicBy(Long gatheringId) {
-        return Optional.ofNullable(
-                queryFactory.selectFrom(gathering)
-                        .leftJoin(gathering.createBy, user).fetchJoin()
-                        .leftJoin(gathering.topic, topic).fetchJoin()
                         .where(gathering.id.eq(gatheringId))
                         .fetchOne()
         );

@@ -15,7 +15,6 @@ import java.time.LocalDateTime;
 @Table(name = "chat_message")
 public class ChatMessage {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String content;
 
@@ -29,7 +28,8 @@ public class ChatMessage {
     private LocalDateTime createdAt;
 
     @Builder
-    private ChatMessage(String content, ChatRoom chatRoom, ChatParticipant chatParticipant, LocalDateTime createdAt) {
+    private ChatMessage(Long id, String content, ChatRoom chatRoom, ChatParticipant chatParticipant, LocalDateTime createdAt) {
+        this.id = id;
         this.content = content;
         this.chatRoom = chatRoom;
         this.chatParticipant = chatParticipant;

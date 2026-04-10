@@ -1,22 +1,23 @@
 package infra.repository.user;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import util.page.PageInfo;
-import util.page.PageableInfo;
+import page.PageInfo;
+import page.PageableInfo;
 import infra.repository.dto.querydsl.QueryDslPageResponse;
 import entity.user.User;
 import lombok.RequiredArgsConstructor;
-import util.page.PageCalculator;
+import org.springframework.stereotype.Repository;
+import page.PageCalculator;
 
 import java.util.List;
 import java.util.Optional;
 
 import static entity.user.QUser.*;
 import static entity.image.QImage.*;
-import static entity.fcm.QFCMToken.*;
 import static entity.gathering.QGathering.*;
 import static entity.enrollment.QEnrollment.*;
 
+@Repository
 @RequiredArgsConstructor
 public class QueryDslUserRepository {
     private final JPAQueryFactory queryFactory;
@@ -45,15 +46,6 @@ public class QueryDslUserRepository {
         return Optional.ofNullable(
                 queryFactory.selectFrom(user)
                         .leftJoin(user.profileImage, image).fetchJoin()
-                        .where(user.id.eq(userId))
-                        .fetchOne()
-        );
-    }
-
-    public Optional<User> findAndTokenByUserId(Long userId) {
-        return Optional.ofNullable(
-                queryFactory.selectFrom(user)
-                        .leftJoin(user.tokens, fCMToken).fetchJoin()
                         .where(user.id.eq(userId))
                         .fetchOne()
         );

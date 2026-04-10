@@ -54,7 +54,7 @@ public class MeetingController {
     }
 
     @GetMapping("/gathering/{gatheringId}/meetings")
-    public ResponseEntity<ApiResponse> meetings(@RequestParam int pageNum,@RequestParam int pageSize,
+    public ResponseEntity<ApiResponse> meetings(@RequestParam(defaultValue = "1") Integer pageNum,@RequestParam(defaultValue = "10") Integer pageSize,
                                                 @PathVariable Long gatheringId){
         ApiResponse apiResponse = meetingService.meetings(pageNum, pageSize,gatheringId);
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);

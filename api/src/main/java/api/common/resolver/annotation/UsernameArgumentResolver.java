@@ -1,5 +1,7 @@
 package api.common.resolver.annotation;
 
+import api.security.jwt.JwtSubject;
+import api.security.userdetail.CustomUserDetail;
 import org.springframework.core.MethodParameter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -15,7 +17,7 @@ public class UsernameArgumentResolver implements HandlerMethodArgumentResolver {
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
         boolean hasUsernameAnnotation = parameter.hasParameterAnnotation(Username.class);
-        boolean hasLongType = String.class.isAssignableFrom(parameter.getParameterType());
+        boolean hasLongType = Long.class.isAssignableFrom(parameter.getParameterType());
         return hasUsernameAnnotation && hasLongType;
     }
 

@@ -2,13 +2,17 @@ package infra.repository.gathering;
 
 import infra.repository.dto.jdbc.gathering.GatheringDetailProjection;
 import infra.repository.dto.jdbc.gathering.MainGatheringsProjection;
+import infra.repository.dto.jdbc.gathering.MainGatheringsProjectionV2;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
 import java.sql.PreparedStatement;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Repository
 public class JdbcGatheringRepository {
@@ -41,10 +45,34 @@ public class JdbcGatheringRepository {
                 "left join image pm on u.image_id = pm.id " +
                 "where g.id = ? " +
                 "order by u.id";
+//        String sql = "select " +
+//                "g.id as id, g.title as title, g.content as content, g.register_date as registerDate, " +
+//                "ca.name as category, cr.username as createdBy, crm.url as createdByUrl, " +
+//                "u.username as participatedBy, u.nickname as participatedByNickname, " +
+//                "pm.url as participatedByUrl, im.url as url, ec.count as count " +
+//                "from gathering g " +
+//                "join category ca on ca.id = g.category_id " +
+//                "join user cr on g.user_id = cr.id " +
+//                "join image crm on cr.image_id = crm.id " +
+//                "join image im on g.image_id = im.id " +
+//                "left join " +
+//                "(select e.* " +
+//                "from enrollment e " +
+//                "where e.gathering_id = ? " +
+//                "order by e.user_id " +
+//                "limit 10) " +
+//                "e on e.gathering_id = g.id " +
+//                "left join user u on u.id = e.user_id " +
+//                "left join image pm on u.image_id = pm.id " +
+//                "left join (select count(*) as count, gathering_id from enrollment where gathering_id = ? and accepted = true group by gathering_id) ec " +
+//                "on ec.gathering_id = g.id " +
+//                "where g.id = ? " +
+//                "order by u.id";
         return jdbcTemplate.query(con -> {
             PreparedStatement pstmt = con.prepareStatement(sql);
             pstmt.setLong(1, gatheringId);
             pstmt.setLong(2, gatheringId);
+            pstmt.setLong(3, gatheringId);
             return pstmt;
         }, gatheringDetailRowMapper());
     }
@@ -52,12 +80,14 @@ public class JdbcGatheringRepository {
     public List<MainGatheringsProjection> gatherings() {
         String sql = "select id, title, content, registerDate, category, createdBy, url, count from ( " +
                 "  select g.id as id, g.title as title, g.content as content, g.register_date as registerDate, ca.name as category, " +
-                "         cr.username as createdBy, im.url as url, g.count as count, " +
+                "         cr.username as createdBy, im.url as url, ec.count as count, " +
                 "         row_number() over (partition by ca.name order by g.count desc) as rownum " +
                 "  from gathering g " +
                 "  left join category ca on g.category_id = ca.id " +
                 "  left join user cr on g.user_id = cr.id " +
                 "  left join image im on g.image_id = im.id " +
+                "  left join (select count(*) as count, gathering_id from enrollment where accepted = true group by gathering_id) ec " +
+                "  on ec.gathering_id = g.id" +
                 ") as subquery " +
                 "where rownum between 1 and 9";
         return jdbcTemplate.query(con -> con.prepareStatement(sql), mainGatheringsRowMapper());
@@ -87,6 +117,60 @@ public class JdbcGatheringRepository {
             pstmt.setString(1, name);
             return pstmt;
         }, mainGatheringsRowMapper());
+    }
+
+    public List<MainGatheringsProjectionV2> gatheringsV2() {
+        String sql = "select g.id, g.title, g.content, g.register_date as registerDate, " +
+                "g.category_id as categoryId, cr.username as createdBy, im.url as url " +
+                "from ( " +
+                "  select g.*, row_number() over (partition by g.category_id order by g.count desc) as rownum " +
+                "  from gathering g " +
+                ") g " +
+                "left join user cr on g.user_id = cr.id " +
+                "left join image im on g.image_id = im.id " +
+                "where g.rownum between 1 and 9";
+        return jdbcTemplate.query(con -> con.prepareStatement(sql), mainGatheringsV2RowMapper());
+    }
+
+    public List<MainGatheringsProjectionV2> gatheringsV3(Long categoryId) {
+        String sql = "select g.id, g.title, g.content, g.register_date as registerDate, " +
+                "g.category_id as categoryId, cr.username as createdBy, im.url as url " +
+                "from gathering g " +
+                "left join user cr on g.user_id = cr.id " +
+                "left join image im on g.image_id = im.id " +
+                "where g.category_id = ? " +
+                "order by g.count desc " +
+                "limit 9";
+        return jdbcTemplate.query(con -> {
+            PreparedStatement pstmt = con.prepareStatement(sql);
+            pstmt.setLong(1, categoryId);
+            return pstmt;
+        }, mainGatheringsV2RowMapper());
+    }
+
+    public Map<Long, Integer> gatheringEnrollmentCounts(List<Long> gatheringIds) {
+        if (gatheringIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        String inClause = gatheringIds.stream()
+                .map(id -> "?")
+                .collect(Collectors.joining(","));
+        String sql = "select gathering_id, count(*) as count from enrollment " +
+                "where accepted = true and gathering_id in (" + inClause + ") " +
+                "group by gathering_id";
+        return jdbcTemplate.query(con -> {
+            PreparedStatement pstmt = con.prepareStatement(sql);
+            for (int i = 0; i < gatheringIds.size(); i++) {
+                pstmt.setLong(i + 1, gatheringIds.get(i));
+            }
+            return pstmt;
+        }, rs -> {
+            Map<Long, Integer> result = new java.util.HashMap<>();
+            while (rs.next()) {
+                result.put(rs.getLong("gathering_id"), rs.getInt("count"));
+            }
+            return result;
+        });
     }
 
     public void updateCount(Long gatheringId, int val) {
@@ -128,6 +212,19 @@ public class JdbcGatheringRepository {
                 .createdBy(rs.getString("createdBy"))
                 .url(rs.getString("url"))
                 .count(rs.getInt("count"))
+                .build();
+    }
+
+    private RowMapper<MainGatheringsProjectionV2> mainGatheringsV2RowMapper() {
+        return (rs, rowNum) -> MainGatheringsProjectionV2.builder()
+                .id(rs.getLong("id"))
+                .title(rs.getString("title"))
+                .content(rs.getString("content"))
+                .registerDate(rs.getTimestamp("registerDate") != null
+                        ? rs.getTimestamp("registerDate").toLocalDateTime() : null)
+                .categoryId(rs.getLong("categoryId"))
+                .createdBy(rs.getString("createdBy"))
+                .url(rs.getString("url"))
                 .build();
     }
 }

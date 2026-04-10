@@ -6,11 +6,14 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @Configuration
 public class RedisConfig {
 
+    @org.springframework.beans.factory.annotation.Value("${spring.data.redis.host}")
     private String host;
+    @org.springframework.beans.factory.annotation.Value("${spring.data.redis.port}")
     private int port;
 
     @Bean
@@ -23,6 +26,8 @@ public class RedisConfig {
 
         RedisTemplate<String, String> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
+        template.setKeySerializer(new StringRedisSerializer());
+        template.setValueSerializer(new StringRedisSerializer());
         return template;
     }
 

@@ -4,6 +4,9 @@ plugins {
     id 'io.spring.dependency-management' version '1.1.7'
 }
 
+bootJar { enabled = false }
+jar { enabled = true }
+
 subprojects {
 
     apply plugin:'java'
@@ -38,9 +41,9 @@ subprojects {
         implementation 'org.springframework.boot:spring-boot-starter-data-redis'
         implementation 'org.springframework.kafka:spring-kafka'
         implementation 'org.springframework.boot:spring-boot-starter-validation'
-        implementation 'org.springframework.boot:spring-boot-starter-mail'
         implementation 'org.springframework.boot:spring-boot-starter-cache'
-        developmentOnly("org.springframework.boot:spring-boot-docker-compose")
+        implementation 'org.redisson:redisson-spring-boot-starter:3.27.0'
+
 
         //jjwt
         implementation 'io.jsonwebtoken:jjwt-api:0.13.0'
@@ -55,7 +58,6 @@ subprojects {
         implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
         implementation 'software.amazon.awssdk:s3:2.20.0'
         implementation 'software.amazon.awssdk:auth:2.20.0'
-        implementation 'com.google.firebase:firebase-admin:9.2.0'
         implementation("net.javacrumbs.shedlock:shedlock-spring:6.4.0")
         implementation("net.javacrumbs.shedlock:shedlock-provider-jdbc-template:6.4.0")
 
@@ -63,6 +65,10 @@ subprojects {
         testImplementation 'org.springframework.boot:spring-boot-starter-test'
         testImplementation("org.springframework.security:spring-security-test")
         testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+        implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+        implementation 'io.micrometer:micrometer-registry-prometheus'
     }
 
     tasks.named('test') {

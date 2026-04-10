@@ -5,25 +5,24 @@ import api.common.mapper.EnrollmentMapper;
 import api.common.mapper.GatheringMapper;
 import api.response.ApiDataResponse;
 import api.response.ApiResponse;
-import api.service.fcm.FCMTokenTopicService;
 import api.service.image.ImageUploadService;
-import util.page.PageableInfo;
 import infra.repository.dto.jdbc.gathering.GatheringDetailProjection;
+import infra.repository.dto.jdbc.gathering.MainGatheringsProjection;
+import infra.repository.dto.jdbc.gathering.MainGatheringsProjectionV2;
 import infra.repository.dto.querydsl.QueryDslPageResponse;
 import infra.repository.dto.querydsl.gathering.GatheringsProjection;
 import infra.repository.dto.querydsl.gathering.ParticipatedProjection;
 import entity.category.Category;
 import entity.enrollment.Enrollment;
-import entity.fcm.Topic;
 import entity.gathering.Gathering;
 import entity.image.Image;
 import entity.user.User;
 import exception.CommonException;
 import exception.Status;
+import infra.redis.service.GatheringCacheService;
 import infra.repository.gathering.JdbcGatheringRepository;
 import infra.repository.category.CategoryRepository;
 import infra.repository.enrollment.EnrollmentRepository;
-import infra.repository.fcm.TopicRepository;
 import infra.repository.gathering.GatheringRepository;
 import infra.repository.image.ImageRepository;
 import infra.repository.user.UserRepository;
@@ -36,8 +35,9 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 import infra.repository.category.QueryDslCategoryRepository;
 import infra.repository.gathering.QueryDslGatheringRepository;
-import common.CategoryUtil;
-import util.page.PageCalculator;
+import page.PageCalculator;
+import page.PageableInfo;
+import util.CategoryUtil;
 
 import java.io.IOException;
 import java.util.List;
@@ -46,8 +46,6 @@ import java.util.stream.Collectors;
 
 import static api.requeset.gathering.GatheringRequestDto.*;
 import static api.response.gathering.GatheringResponseDto.*;
-import static util.TopicGenerator.generateTopic;
-
 
 @Service
 @Transactional
@@ -59,12 +57,11 @@ public class GatheringService {
     private final ImageRepository imageRepository;
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
-    private final TopicRepository topicRepository;
     private final QueryDslCategoryRepository queryDslCategoryRepository;
     private final QueryDslGatheringRepository queryDslGatheringRepository;
     private final JdbcGatheringRepository jdbcGatheringRepository;
+    private final GatheringCacheService gatheringCacheService;
     private final ImageUploadService imageUploadService;
-    private final FCMTokenTopicService fcmTokenTopicService;
     @Value("${file.path}")
     private String path;
 
@@ -81,13 +78,9 @@ public class GatheringService {
             Gathering gathering = GatheringMapper.toGathering(addGatheringRequest,user,image,category);
             Enrollment enrollment = EnrollmentMapper.toEnrollment(true, gathering, user);
             if(image!=null) imageRepository.save(image);
-            Topic topic = generateTopic(gathering);
-            gathering.changeTopic(topic);
             gatheringRepository.save(gathering);
             categoryRepository.save(category);
-            topicRepository.save(topic);
             enrollmentRepository.save(enrollment);
-            fcmTokenTopicService.subscribeToTopic(topic.getTopicName(),userId);
             return ApiDataResponse.of(gathering.getId(),Status.SUCCESS);
     }
 
@@ -97,7 +90,7 @@ public class GatheringService {
                     .orElseThrow(()->new CommonException(Status.NOT_FOUND_USER));
             Category category = queryDslCategoryRepository.findBy(gatheringId, updateGatheringRequest.getCategory())
                     .orElseThrow(()-> new CommonException(Status.NOT_FOUND_CATEGORY));
-            Gathering gathering = queryDslGatheringRepository.findGatheringFetchCreatedByAndTokensId(gatheringId)
+            Gathering gathering = queryDslGatheringRepository.findGatheringFetchCreatedBy(gatheringId)
                     .orElseThrow(()->new CommonException(Status.NOT_FOUND_GATHERING));
             User createBy = gathering.getCreateBy();
             boolean authorize = ObjectUtils.nullSafeEquals(createBy.getId(),userId);
@@ -134,16 +127,109 @@ public class GatheringService {
     }
 
     public ApiResponse gatherings() {
-        List<GatheringsProjection> gatheringsProjections = CategoryUtil.list.stream()
-                .map(jdbcGatheringRepository::subGatherings)
-                .flatMap(List::stream)
-                .map(GatheringsProjection::of)
-                .toList();
-        List<MainGatheringElement> mainGatheringElements = gatheringsProjections.stream()
-                .map(projection -> MainGatheringElement.from(projection, url -> path + url))
-                .toList();
+
+//        List<GatheringsProjection> gatheringsProjections = CategoryUtil.list.stream()
+//                .map(jdbcGatheringRepository::subGatherings)
+//                .flatMap(List::stream)
+//                .map(GatheringsProjection::of)
+//                .toList();
+//        List<MainGatheringElement> mainGatheringElements = gatheringsProjections.stream()
+//                .map(projection -> MainGatheringElement.from(projection, url -> path + url))
+//                .toList();
+        List<MainGatheringsProjection> mainGatheringElements = jdbcGatheringRepository.gatherings();
         Map<String, CategoryTotalGatherings> map = categorizeByCategory(mainGatheringElements);
         return toMainGatheringResponse(map);
+    }
+
+    public ApiResponse gatheringsV2() {
+        List<MainGatheringsProjectionV2> projections = jdbcGatheringRepository.gatheringsV2();
+
+        List<Long> gatheringIds = projections.stream()
+                .map(MainGatheringsProjectionV2::getId)
+                .toList();
+        Map<Long, Integer> enrollmentCounts = jdbcGatheringRepository.gatheringEnrollmentCounts(gatheringIds);
+
+        Map<Long, String> categoryNameMap = categoryRepository.findAll().stream()
+                .collect(Collectors.toMap(Category::getId, Category::getName));
+
+        List<MainGatheringsProjection> mainGatheringElements = projections.stream()
+                .map(p -> MainGatheringsProjection.builder()
+                        .id(p.getId())
+                        .title(p.getTitle())
+                        .content(p.getContent())
+                        .registerDate(p.getRegisterDate())
+                        .category(categoryNameMap.getOrDefault(p.getCategoryId(), "unknown"))
+                        .createdBy(p.getCreatedBy())
+                        .url(p.getUrl())
+                        .count(enrollmentCounts.getOrDefault(p.getId(), 0))
+                        .build())
+                .toList();
+
+        Map<String, CategoryTotalGatherings> map = categorizeByCategory(mainGatheringElements);
+        return toMainGatheringResponse(map);
+    }
+
+    public ApiResponse gatheringsV3() {
+        Map<Long, String> categoryNameMap = categoryRepository.findAll().stream()
+                .collect(Collectors.toMap(Category::getId, Category::getName));
+
+        List<MainGatheringsProjectionV2> projections = categoryNameMap.keySet().stream()
+                .flatMap(categoryId -> jdbcGatheringRepository.gatheringsV3(categoryId).stream())
+                .toList();
+
+        List<Long> gatheringIds = projections.stream()
+                .map(MainGatheringsProjectionV2::getId)
+                .toList();
+        Map<Long, Integer> enrollmentCounts = jdbcGatheringRepository.gatheringEnrollmentCounts(gatheringIds);
+
+        List<MainGatheringsProjection> mainGatheringElements = projections.stream()
+                .map(p -> MainGatheringsProjection.builder()
+                        .id(p.getId())
+                        .title(p.getTitle())
+                        .content(p.getContent())
+                        .registerDate(p.getRegisterDate())
+                        .category(categoryNameMap.getOrDefault(p.getCategoryId(), "unknown"))
+                        .createdBy(p.getCreatedBy())
+                        .url(p.getUrl())
+                        .count(enrollmentCounts.getOrDefault(p.getId(), 0))
+                        .build())
+                .toList();
+
+        Map<String, CategoryTotalGatherings> map = categorizeByCategory(mainGatheringElements);
+        return toMainGatheringResponse(map);
+    }
+
+    public ApiResponse gatheringsV4() {
+        List<MainGatheringsProjection> mainGatheringElements = gatheringCacheService.getOrLoad(this::loadGatheringsFromDb);
+        Map<String, CategoryTotalGatherings> map = categorizeByCategory(mainGatheringElements);
+        return toMainGatheringResponse(map);
+    }
+
+    private List<MainGatheringsProjection> loadGatheringsFromDb() {
+        Map<Long, String> categoryNameMap = categoryRepository.findAll().stream()
+                .collect(Collectors.toMap(Category::getId, Category::getName));
+
+        List<MainGatheringsProjectionV2> projections = categoryNameMap.keySet().stream()
+                .flatMap(categoryId -> jdbcGatheringRepository.gatheringsV3(categoryId).stream())
+                .toList();
+
+        List<Long> gatheringIds = projections.stream()
+                .map(MainGatheringsProjectionV2::getId)
+                .toList();
+        Map<Long, Integer> enrollmentCounts = jdbcGatheringRepository.gatheringEnrollmentCounts(gatheringIds);
+
+        return projections.stream()
+                .map(p -> MainGatheringsProjection.builder()
+                        .id(p.getId())
+                        .title(p.getTitle())
+                        .content(p.getContent())
+                        .registerDate(p.getRegisterDate())
+                        .category(categoryNameMap.getOrDefault(p.getCategoryId(), "unknown"))
+                        .createdBy(p.getCreatedBy())
+                        .url(p.getUrl())
+                        .count(enrollmentCounts.getOrDefault(p.getId(), 0))
+                        .build())
+                .toList();
     }
 
     public ApiResponse participated(Long gatheringId,Integer pageNum,Integer pageSize) {
@@ -160,13 +246,13 @@ public class GatheringService {
         return ApiDataResponse.of(content,Status.SUCCESS);
     }
 
-    private Map<String, CategoryTotalGatherings> categorizeByCategory(List<MainGatheringElement> mainGatheringElements) {
+    private Map<String, CategoryTotalGatherings> categorizeByCategory(List<MainGatheringsProjection> mainGatheringElements) {
         return mainGatheringElements.stream()
                 .collect(Collectors.groupingBy(
-                        MainGatheringElement::getCategory,
+                        MainGatheringsProjection::getCategory,
                         Collectors.collectingAndThen(
                                 Collectors.toList(),
-                                this::processCategoryElements
+                                this::processCategoryProjections
                         )
                 ));
     }
@@ -196,6 +282,22 @@ public class GatheringService {
             return gatheringResponse;
     }
 
+
+    private CategoryTotalGatherings processCategoryProjections(List<MainGatheringsProjection> projections) {
+            List<MainGatheringElement> elements = projections.stream()
+                    .map(p -> MainGatheringElement.builder()
+                            .id(p.getId())
+                            .title(p.getTitle())
+                            .content(p.getContent())
+                            .registerDate(p.getRegisterDate())
+                            .category(p.getCategory())
+                            .createdBy(p.getCreatedBy())
+                            .url(path + p.getUrl())
+                            .count(p.getCount())
+                            .build())
+                    .toList();
+            return processCategoryElements(elements);
+    }
 
     private CategoryTotalGatherings processCategoryElements(List<MainGatheringElement> elements) {
             boolean hasNext = elements.size() >= 9;

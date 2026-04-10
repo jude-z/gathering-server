@@ -39,7 +39,7 @@ public class BoardController {
 
     @GetMapping("/gathering/{gatheringId}/boards")
     public ResponseEntity<ApiResponse> fetchBoards(@PathVariable Long gatheringId,
-                                                   Integer pageNum, Integer pageSize){
+                                                   @RequestParam(defaultValue = "1") Integer pageNum, @RequestParam(defaultValue = "10") Integer pageSize){
         ApiResponse apiResponse = boardService.fetchBoards(gatheringId, pageNum, pageSize);
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }

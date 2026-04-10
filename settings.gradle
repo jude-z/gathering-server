@@ -1,15 +1,12 @@
-rootProject.name = 'MyProject'
+rootProject.name = 'Gathering'
 
 include 'infra'
 include 'domain'
 include 'api'
-include 'mail-server'
-include 'chat-server'
 
 include 'common'
-include 'common:untitled'
 include 'common:event'
 include 'common:util'
 include 'common:page'
-include 'common:fcm'
-include 'common:util'
+
+include 'chat-server'
