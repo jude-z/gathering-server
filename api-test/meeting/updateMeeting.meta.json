@@ -1,7 +1,0 @@
-{
-  "method": "PUT",
-  "url": "/gathering/{gatheringId}/meeting/{meetingId}",
-  "contentType": "multipart/form-data",
-  "auth": true,
-  "parts": ["updateMeetingRequest (json)", "file (image, optional)"]
-}

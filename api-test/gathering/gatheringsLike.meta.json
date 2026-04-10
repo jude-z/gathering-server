@@ -1,6 +1,0 @@
-{
-  "method": "POST",
-  "url": "/gatherings/like",
-  "auth": true,
-  "queryParam": ["pageNum", "pageSize"]
-}

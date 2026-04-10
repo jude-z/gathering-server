@@ -1,6 +1,0 @@
-{
-  "method": "GET",
-  "url": "/gathering",
-  "auth": false,
-  "queryParam": ["category", "pageNum", "pageSize"]
-}

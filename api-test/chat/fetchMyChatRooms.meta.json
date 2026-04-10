@@ -1,6 +1,0 @@
-{
-  "method": "GET",
-  "url": "/my/chats",
-  "auth": true,
-  "queryParam": ["pageNum", "pageSize"]
-}

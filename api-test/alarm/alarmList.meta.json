@@ -1,6 +1,0 @@
-{
-  "method": "GET",
-  "url": "/alarm",
-  "auth": true,
-  "queryParam": ["pageNum", "pageSize", "checked"]
-}

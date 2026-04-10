@@ -1,5 +1,0 @@
-{
-  "method": "PATCH",
-  "url": "/gathering/{gatheringId}/dislike",
-  "auth": true
-}

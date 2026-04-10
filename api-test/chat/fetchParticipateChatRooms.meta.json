@@ -1,6 +1,0 @@
-{
-  "method": "GET",
-  "url": "/gathering/{gatheringId}/participate/chats",
-  "auth": true,
-  "queryParam": ["pageNum", "pageSize"]
-}
